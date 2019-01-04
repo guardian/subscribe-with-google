@@ -5,14 +5,31 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "./node_modules/nodemon/bin/nodemon.js server.js"
+    "start": "./node_modules/nodemon/bin/nodemon.js ./app/server.js",
+    "riffraff": "VERBOSE=true ARTEFACT_PATH=$(pwd) riffraff-artefact",
+    "build:dev": "webpack --config webpack.config.js",
+    "build:prod": "webpack webpack -p --config webpack.config.js"
   },
+  "cloudformation": "../cfn.yaml",
+  "riffraffFile": "../riff-raff.yaml",
+  "uploadArtefact": true,
+  "buildDir": "dist",
+  "projectName": "support:subscribe-with-google",
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "webpack-node-externals": "^1.7.2"
   },
   "devDependencies": {
-    "nodemon": "^1.18.9"
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-proposal-class-properties": "^7.2.3",
+    "@babel/preset-env": "^7.2.3",
+    "babel-loader": "^8.0.5",
+    "babel-plugin-source-map-support": "^2.0.1",
+    "node-riffraff-artefact": "^2.0.1",
+    "nodemon": "^1.18.9",
+    "webpack": "^4.28.3",
+    "webpack-cli": "^3.2.0"
   }
 }

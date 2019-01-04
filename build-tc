@@ -29,17 +29,17 @@ nvm install
 nvm use
 
 
-# Installing packages via yarn
+# Installing packages via npm
 
-yarn install
+npm install
 
 # run tests with yarn
 
-yarn test
+# yarn test
 
 # produce prod artifacts
 
-yarn bundle
+npm build:dev
 
 # push to riffraff
 
