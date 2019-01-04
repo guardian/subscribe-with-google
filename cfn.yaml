@@ -1,0 +1,212 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: subscribe-with-google
+Parameters:
+  VpcId:
+    Type: String
+    Description: VpcId of your existing Virtual Private Cloud (VPC)
+    Default: vpc-e6e00183
+  Subnets:
+    Type: CommaDelimitedList
+    Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
+    Default: subnet-cb91ae8d, subnet-a7b74ac2, subnet-179e8063
+  Stack:
+    Description: Applied directly as a tag
+    Type: String
+    Default: support
+  Stage:
+    Description: Applied directly as a tag
+    Type: String
+  App:
+    Description: Applied directly as a tag
+    Type: String
+    Default: subscribe-with-google
+  AMI:
+    Description: AMI ID
+    Type: String
+    Default: ami-88a6af62
+  OfficeCIDR:
+    Description: Office IP range
+    Type: String
+  CertificateARN:
+    Description: SSL Certificate
+    Type: String
+Resources:
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AvailabilityZones: !GetAZs
+      VPCZoneIdentifier: !Ref Subnets
+      LaunchConfigurationName: !Ref LaunchConfig
+      MinSize: 1
+      MaxSize: 2
+      TargetGroupARNs:
+        - !Ref TargetGroup
+      HealthCheckType: ELB
+      HealthCheckGracePeriod: 300
+      Tags:
+        - Key: Stack
+          Value: !Ref Stack
+          PropagateAtLaunch: true
+        - Key: App
+          Value: !Ref App
+          PropagateAtLaunch: true
+        - Key: Stage
+          Value: !Ref Stage
+          PropagateAtLaunch: true
+  LaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: !Ref AMI
+      SecurityGroups:
+        - !Ref InstanceSecurityGroup
+      InstanceType: !FindInMap [ StageVariables, !Ref Stage, InstanceType ]
+      IamInstanceProfile: !Ref InstanceProfile
+      AssociatePublicIpAddress: true
+      UserData:
+        Fn::Base64: !Sub
+          - |+
+            #!/bin/bash -ev
+            # get runnable tar from S3
+            aws --region ${AWS::Region} s3 cp s3://membership-dist/${Stack}/${Stage}/${App}/subscribe-with-google.tgz /tmp
+            mkdir /etc/gu
+            tar -xvzf /tmp/subscribe-with-google.tgz --directory /etc/gu/
+            # add user
+            groupadd subscribe-with-google
+            useradd -r -s /usr/bin/nologin -g subscribe-with-google subscribe-with-google
+            touch /var/log/subscribe-with-google.log
+            chown -R subscribe-with-google:subscribe-with-google /etc/gu
+            chown subscribe-with-google:subscribe-with-google /var/log/subscribe-with-google.log
+            # write out systemd file
+            cat >/etc/systemd/system/subscribe-with-google.service <<EOL
+            [Service]
+            ExecStart=/usr/bin/node /etc/gu/dist/server.js
+            Restart=always
+            StandardOutput=syslog
+            StandardError=syslog
+            SyslogIdentifier=subscribe-with-google
+            User=subscribe-with-google
+            Group=subscribe-with-google
+            [Install]
+            WantedBy=multi-user.target
+            EOL
+            # RUN
+            systemctl enable subscribe-with-google
+            systemctl start subscribe-with-google
+  AppRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: "/"
+      ManagedPolicyArns:
+      - !Sub arn:aws:iam::${AWS::AccountId}:policy/guardian-ec2-role-for-ssm
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: PushLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+                Resource: !GetAtt ManageFrontendLogGroup.Arn
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref AppRole
+
+  ElasticLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub ${Stack}-${Stage}-${App}
+      Subnets: !Ref Subnets
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroup
+      Tags:
+        - Key: Stack
+          Value: !Ref Stack
+        - Key: App
+          Value: !Ref App
+        - Key: Stage
+          Value: !Ref Stage
+
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn:
+          Ref: TargetGroup
+      LoadBalancerArn:
+        Ref: ElasticLoadBalancer
+      Certificates:
+        - CertificateArn: !Ref CertificateARN
+      Port: 443
+      Protocol: HTTPS
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub ${Stack}-${Stage}-${App}
+      Port: 9233
+      Protocol: HTTP
+      VpcId:
+        Ref: VpcId
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /_healthcheck
+      HealthCheckPort: 9233
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      TargetGroupAttributes:
+      - Key: deregistration_delay.timeout_seconds
+        Value: 45 # only connection drains for 45 seconds (rather than default of 300)
+    DependsOn:
+    - ElasticLoadBalancer
+
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Permit incoming HTTPS access on port 443, egress to port 9233
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 9233
+          ToPort: 9233
+          CidrIp: 0.0.0.0/0
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open up SSH access and enable HTTP access on the configured port
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref OfficeCIDR
+        - IpProtocol: tcp
+          FromPort: 9233
+          ToPort: 9233
+          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
