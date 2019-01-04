@@ -79,7 +79,7 @@ Resources:
             # write out systemd file
             cat >/etc/systemd/system/subscribe-with-google.service <<EOL
             [Service]
-            ExecStart=/usr/bin/node /etc/gu/server.js
+            ExecStart=/usr/bin/node /etc/gu/dist/server.js
             Restart=always
             StandardOutput=syslog
             StandardError=syslog
