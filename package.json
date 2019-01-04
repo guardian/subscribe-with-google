@@ -8,7 +8,7 @@
     "start": "./node_modules/nodemon/bin/nodemon.js ./app/server.js",
     "riffraff": "VERBOSE=true ARTEFACT_PATH=$(pwd) riffraff-artefact",
     "build:dev": "webpack --config webpack.config.js",
-    "build:prod": "webpack webpack -p --config webpack.config.js"
+    "build:prod": "webpack -p --config webpack.config.js"
   },
   "cloudformation": "../cfn.yaml",
   "riffraffFile": "../riff-raff.yaml",

@@ -18,7 +18,7 @@ export PATH="$PATH:$YARN_LOCATION/yarn-v$YARN_VERSION/bin"
 
 # cd into the app directory where package.json resides
 
-cd app
+# cd app
 
 # install node
 
@@ -31,7 +31,7 @@ nvm use
 
 # Installing packages via npm
 
-npm install
+yarn
 
 # run tests with yarn
 
@@ -39,7 +39,7 @@ npm install
 
 # produce prod artifacts
 
-npm build:dev
+yarn build:dev
 
 # push to riffraff
 
