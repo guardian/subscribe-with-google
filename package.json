@@ -10,8 +10,8 @@
     "build:dev": "webpack --config webpack.config.js",
     "build:prod": "webpack -p --config webpack.config.js"
   },
-  "cloudformation": "../cfn.yaml",
-  "riffraffFile": "../riff-raff.yaml",
+  "cloudformation": "./cfn.yaml",
+  "riffraffFile": "./riff-raff.yaml",
   "uploadArtefact": true,
   "buildDir": "dist",
   "projectName": "support:subscribe-with-google",
