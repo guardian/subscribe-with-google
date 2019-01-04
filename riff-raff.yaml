@@ -1,0 +1,19 @@
+regions:
+- eu-west-1
+stacks:
+- support
+deployments:
+  subscribe-with-google-cloudformation:
+    type: cloud-formation
+    app: subscribe-with-google
+    parameters:
+      templatePath: cloudformation/cfn.yaml
+      amiTags:
+        Recipe: subscribe-with-google
+        AmigoStage: PROD
+      amiEncrypted: true
+  subscribe-with-google:
+    type: autoscaling
+    dependencies: [subscribe-with-google-cloudformation]
+    parameters:
+      bucket: membership-dist
