@@ -63,8 +63,7 @@ Resources:
       IamInstanceProfile: !Ref InstanceProfile
       AssociatePublicIpAddress: true
       UserData:
-        Fn::Base64: !Sub
-          - |+
+        Fn::Base64: !Sub |
             #!/bin/bash -ev
             # get runnable tar from S3
             aws --region ${AWS::Region} s3 cp s3://membership-dist/${Stack}/${Stage}/${App}/subscribe-with-google.tgz /tmp

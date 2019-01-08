@@ -1,3 +1,4 @@
+# deployment script
 regions:
 - eu-west-1
 stacks:
@@ -5,7 +6,7 @@ stacks:
 deployments:
   subscribe-with-google-cloudformation:
     type: cloud-formation
-    app: subscribe-with-google
+    app: swg
     parameters:
       templatePath: cloudformation/cfn.yaml
       amiTags:
@@ -17,3 +18,4 @@ deployments:
     dependencies: [subscribe-with-google-cloudformation]
     parameters:
       bucket: membership-dist
+      
