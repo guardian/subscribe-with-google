@@ -59,7 +59,7 @@ Resources:
       ImageId: !Ref AMI
       SecurityGroups:
         - !Ref InstanceSecurityGroup
-      InstanceType: !FindInMap [ StageVariables, !Ref Stage, InstanceType ]
+      InstanceType: t2.micro
       IamInstanceProfile: !Ref InstanceProfile
       AssociatePublicIpAddress: true
       UserData:
