@@ -19,11 +19,11 @@ Parameters:
   App:
     Description: Applied directly as a tag
     Type: String
-    Default: subscribe-with-google
+    Default: subs-with-google
   AMI:
     Description: AMI ID
     Type: String
-    Default: ami-88a6af62
+    Default: ami-04f55a1423a3d55c6
   OfficeCIDR:
     Description: Office IP range
     Type: String
