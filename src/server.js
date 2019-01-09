@@ -2,7 +2,7 @@ const express = require('express');
 const {incrementCount, getCount} = require('./count');
 
 const app = express();
-const PORT = 5000;
+const PORT = 9233;
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

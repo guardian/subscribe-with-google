@@ -8,7 +8,9 @@
     "start": "./node_modules/nodemon/bin/nodemon.js ./app/server.js",
     "riffraff": "VERBOSE=true ARTEFACT_PATH=$(pwd) riffraff-artefact",
     "build:dev": "webpack --config webpack.config.js",
-    "build:prod": "webpack -p --config webpack.config.js"
+    "bundle": "copy-node-modules . ./dist && webpack --config webpack.config.js",
+    "build:prod": "webpack -p --config webpack.config.js",
+    "serve:dist": "./node_modules/nodemon/bin/nodemon.js ./dist/server.js"
   },
   "cloudformation": "./cfn.yaml",
   "riffraffFile": "./riff-raff.yaml",
@@ -27,6 +29,7 @@
     "@babel/preset-env": "^7.2.3",
     "babel-loader": "^8.0.5",
     "babel-plugin-source-map-support": "^2.0.1",
+    "copy-node-modules": "^1.1.1",
     "node-riffraff-artefact": "^2.0.1",
     "nodemon": "^1.18.9",
     "webpack": "^4.28.3",

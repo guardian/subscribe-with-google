@@ -16,7 +16,7 @@ const babelCommon = {
 };
 
 const config = {
-    entry: "./app/server",
+    entry: "./src/server",
     mode: "development",
     output: {
       path: path.resolve(__dirname, "dist"),

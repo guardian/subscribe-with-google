@@ -39,7 +39,7 @@ yarn
 
 # produce prod artifacts
 
-yarn build:dev
+yarn bundle
 
 # push to riffraff
 
