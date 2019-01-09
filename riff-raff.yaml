@@ -6,7 +6,7 @@ stacks:
 deployments:
   subscribe-with-google-cloudformation:
     type: cloud-formation
-    app: subs-with-google
+    app: subscribe-with-google
     parameters:
       templatePath: cloudformation/cfn.yaml
       amiTags:

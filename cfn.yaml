@@ -19,7 +19,7 @@ Parameters:
   App:
     Description: Applied directly as a tag
     Type: String
-    Default: subs-with-google
+    Default: subscribe-with-google
   AMI:
     Description: AMI ID
     Type: String
@@ -116,7 +116,7 @@ Resources:
   ElasticLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: !Sub ${Stack}-${Stage}-${App}
+      Name: !Sub ${Stack}-${Stage}-subs-with-google
       Subnets: !Ref Subnets
       SecurityGroups:
         - !Ref LoadBalancerSecurityGroup
