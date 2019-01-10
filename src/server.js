@@ -44,6 +44,10 @@ app.get('/subscribe', (req, res) => {
     res.send('{}');
 })
 
+app.get('/_healthcheck', (req, res) => {
+    res.send('healthy');
+})
+
 app.get('/', (req, res) => {
     res.send('server is up');
 })
