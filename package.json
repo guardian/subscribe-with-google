@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "./node_modules/nodemon/bin/nodemon.js ./app/server.js",
+    "start": "./node_modules/nodemon/bin/nodemon.js ./src/server.js",
     "riffraff": "VERBOSE=true ARTEFACT_PATH=$(pwd) riffraff-artefact",
     "build:dev": "webpack --config webpack.config.js",
     "bundle": "copy-node-modules . ./dist && webpack --config webpack.config.js",
