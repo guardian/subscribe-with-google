@@ -31,31 +31,7 @@ const config = {
     node: {
       __dirname: false,
       __filename: false
-    },
-    // module: {
-    //   rules: [
-    //     {
-    //       // Include ts, tsx, and js files.
-    //       test: /\.(tsx?)|(js)$/,
-    //       exclude: /node_modules/,
-    //       loader: "babel-loader",
-    //       options: {
-    //         plugins: [...babelCommon.plugins, "babel-plugin-source-map-support"],
-    //         presets: [
-    //           [
-    //             "@babel/env",
-    //             {
-    //               "targets": {
-    //                 "esmodules": false
-    //               }
-    //             }
-         
-    //           ]
-    //         ]
-    //       }
-    //     }
-    //   ]
-    // }
+    }
   };
   
 
