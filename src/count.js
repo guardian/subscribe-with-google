@@ -6,7 +6,11 @@ const incrementCount = () => {
 
 const getCount = () => count;
 
+const resetCount = () => {
+    count = 0;
+}
 module.exports = {
     incrementCount: incrementCount,
-    getCount: getCount
+    getCount: getCount,
+    resetCount
 }

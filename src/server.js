@@ -1,5 +1,9 @@
 const express = require('express');
-const {incrementCount, getCount} = require('./count');
+const {
+    incrementCount, 
+    getCount, 
+    resetCount
+} = require('./count');
 
 const app = express();
 const PORT = 9233;
@@ -46,6 +50,11 @@ app.get('/subscribe', (req, res) => {
 
 app.get('/_healthcheck', (req, res) => {
     res.send('healthy');
+})
+
+app.get('/_reset', (req, res) => {
+    resetCount();
+    res.send(`Count has been set to ${getCount()}`);
 })
 
 app.get('/', (req, res) => {
