@@ -30,7 +30,8 @@ app.get('/oauth', (req, res) => {
         "data" : {
             "loggedIn": false,
             "subscriptionType": "premium",
-            "showSwg": views
+            "showSwg": views,
+            "numberOfViews": getCount()
           }
       }));
 })
