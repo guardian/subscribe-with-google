@@ -1,4 +1,6 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+
 const {
     incrementCount, 
     getCount, 
@@ -7,6 +9,8 @@ const {
 
 const app = express();
 const PORT = 9233;
+
+app.use(express.json());
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -36,6 +40,12 @@ app.get('/oauth', (req, res) => {
             "numberOfViews": getCount()
           }
       }));
+})
+
+app.post('/store-contribution', (req, res) => {
+    console.log(req.body);
+    // res.json({requestBody: req.body})
+    res.send(`${JSON.stringify(req.body)}`);
 })
 
 app.post('/pingback', (req, res) => {
