@@ -18,11 +18,7 @@ app.use(function(req, res, next) {
     next();
 });
 
-// app.use(express.static('public'));
-
-app.post('/googlee11fabef1d53492a.html.', (req, res) => {
-    res.send('google-site-verification: googlee11fabef1d53492a.html');
-})
+app.use(express.static(__dirname + '/public'));
 
 app.get('/oauth', (req, res) => {
     incrementCount();
