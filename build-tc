@@ -42,7 +42,7 @@ yarn
 yarn bundle
 
 # copy google verification file to dist
-mkdir dist/public/
+mkdir dist/public
 cp public/googlee11fabef1d53492a.html dist/public/
 
 # push to riffraff
