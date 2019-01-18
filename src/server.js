@@ -18,6 +18,8 @@ app.use(function(req, res, next) {
     next();
 });
 
+app.use(express.static('dist'));
+
 app.get('/oauth', (req, res) => {
     incrementCount();
     const views = getCount() <= 4;
