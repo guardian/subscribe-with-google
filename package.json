@@ -7,9 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "./node_modules/nodemon/bin/nodemon.js ./src/server.js",
     "riffraff": "VERBOSE=true ARTEFACT_PATH=$(pwd) riffraff-artefact",
-    "bundle": "copy-node-modules . ./dist && webpack --config webpack.config.js",
+    "clean:dist": "rm -rf dist",
+    "bundle": "yarn clean:dist && copy-node-modules . ./dist && webpack --config webpack.config.js",
     "build:prod": "webpack -p --config webpack.config.js",
-    "move:verification": "mkdir dist/public && cp public/googlee11fabef1d53492a.html dist/public",
+    "move:verification": "mkdir dist/public/ && cp public/googlee11fabef1d53492a.html dist/public/",
     "build:dist": "yarn bundle && yarn move:verification",
     "serve:dist": "./node_modules/nodemon/bin/nodemon.js ./dist/server.js"
   },
