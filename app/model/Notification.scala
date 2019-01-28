@@ -1,13 +1,24 @@
 package model
 
+import play.api.libs.json.Json
+
 sealed trait Notification {
   val version: String
 }
 
 case class SubscriptionNotification(version: String,
-                                    notificationType: Int, //todo: Enumeration or atleast factory to meaningful type
+                                    notificationType: NotificationType,
                                     purchaseToken: String,
                                     subscriptionId: String) extends Notification {}
 
 case class TestNotification(version: String) extends Notification {}
+
+
+object SubscriptionNotification {
+  implicit val format = Json.format[SubscriptionNotification]
+}
+
+object TestNotification {
+  implicit val format = Json.format[TestNotification]
+}
 

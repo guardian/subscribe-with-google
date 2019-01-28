@@ -9,11 +9,7 @@ class OAuthController @Inject()(cc: ControllerComponents) extends AbstractContro
   private val MaxViews = 4
 
   def oauth(count: Int = 0) = Action { implicit request: Request[AnyContent] =>
-    if (count >= MaxViews) {
-      ???
-    } else {
-      ???
-    }
+    Ok("{}")
   }
 
 
