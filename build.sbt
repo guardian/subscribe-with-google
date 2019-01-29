@@ -24,7 +24,7 @@ libraryDependencies ++= Seq(
 enablePlugins(JavaAppPackaging, RiffRaffArtifact)
 
 topLevelDirectory in Universal := None
-packageName in Universal := s"support:${normalizedName.value}"
+packageName in Universal := normalizedName.value
 
 riffRaffPackageType := (packageBin in Universal).value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
