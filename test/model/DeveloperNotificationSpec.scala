@@ -1,6 +1,5 @@
 package model
 
-import model._
 import org.scalatest.{Matchers, WordSpecLike}
 import play.api.libs.json.{JsError, JsResult, Json}
 

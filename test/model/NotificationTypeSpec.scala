@@ -1,6 +1,5 @@
 package model
 
-import model.NotificationType
 import org.scalatest.{Matchers, WordSpecLike}
 
 class NotificationTypeSpec extends WordSpecLike with Matchers {
