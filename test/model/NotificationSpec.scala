@@ -1,4 +1,4 @@
-package controllers.model
+package model
 
 import model.{Notification, NotificationType, SubscriptionNotification, TestNotification}
 import org.scalatest.{Matchers, WordSpecLike}
