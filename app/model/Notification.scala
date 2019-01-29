@@ -1,7 +1,9 @@
 package model
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, JsResult, JsValue, Json}
 
+
+//No need to deserialize based on trait type as specificity is determined by DeveloperNotification type
 sealed trait Notification {
   val version: String
 }
@@ -21,4 +23,3 @@ object SubscriptionNotification {
 object TestNotification {
   implicit val format = Json.format[TestNotification]
 }
-
