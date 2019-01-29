@@ -1,6 +1,5 @@
 package model
 
-import model.{Notification, NotificationType, SubscriptionNotification, TestNotification}
 import org.scalatest.{Matchers, WordSpecLike}
 import play.api.libs.json.Json
 
