@@ -1,4 +1,4 @@
-package controllers.model
+package model
 
 import model._
 import org.scalatest.{Matchers, WordSpecLike}
