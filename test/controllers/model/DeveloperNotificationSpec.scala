@@ -7,7 +7,7 @@ import play.api.libs.json.{JsError, JsResult, Json}
 class DeveloperNotificationSpec extends WordSpecLike with Matchers {
 
   "Developer Notification" must {
-    "Serialize a subscription event" in {
+    "Serialize a developer subscription notification" in {
 
       val subscriptionNotification = SubscriptionNotification("1.0",
         NotificationType.SubscriptionPurchased,
@@ -15,7 +15,7 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
         "sku")
 
       val currentTime = System.currentTimeMillis()
-      val subscriptionEvent: IncomingGoogleEvent = IncomingSubscriptionEvent(
+      val subscriptionDeveloperNotification: DeveloperNotification = SubscriptionDeveloperNotification(
         "1.0",
         "com.gu",
         currentTime,
@@ -33,16 +33,16 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
            |"subscriptionId":"sku"}}""".stripMargin
       )
 
-      Json.toJson[IncomingGoogleEvent](subscriptionEvent) shouldBe jsValue
+      Json.toJson[DeveloperNotification](subscriptionDeveloperNotification) shouldBe jsValue
 
     }
 
-    "Serialize a test event" in {
+    "Serialize a developer test notification" in {
 
       val testNotification = TestNotification("1.0")
 
       val currentTime = System.currentTimeMillis()
-      val incomingTestEvent: IncomingGoogleEvent = IncomingTestEvent(
+      val testDeveloperNotification: DeveloperNotification = TestDeveloperNotification(
         "1.0",
         "com.gu",
         currentTime,
@@ -59,15 +59,15 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
            |}""".stripMargin
       )
 
-      Json.toJson[IncomingGoogleEvent](incomingTestEvent) shouldBe jsValue
+      Json.toJson[DeveloperNotification](testDeveloperNotification) shouldBe jsValue
 
     }
 
-    "Deserialize a test event" in {
+    "Deserialize a developer test notification" in {
       val testNotification = TestNotification("1.0")
 
       val currentTime = System.currentTimeMillis()
-      val incomingTestEvent: IncomingGoogleEvent = IncomingTestEvent(
+      val testDeveloperNotification: DeveloperNotification = TestDeveloperNotification(
         "1.0",
         "com.gu",
         currentTime,
@@ -84,10 +84,10 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
            |}""".stripMargin
 
 
-      Json.fromJson[IncomingGoogleEvent](Json.parse(jsonString)).get shouldBe incomingTestEvent
+      Json.fromJson[DeveloperNotification](Json.parse(jsonString)).get shouldBe testDeveloperNotification
     }
 
-    "Deserialize a subscription event" in {
+    "Deserialize a developer subscription notification" in {
 
       val subscriptionNotification = SubscriptionNotification("1.0",
         NotificationType.SubscriptionInGracePeriod,
@@ -95,7 +95,7 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
         "sku")
 
       val currentTime = System.currentTimeMillis()
-      val subscriptionEvent: IncomingGoogleEvent = IncomingSubscriptionEvent(
+      val subscriptionDeveloperNotification: DeveloperNotification = SubscriptionDeveloperNotification(
         "1.0",
         "com.gu",
         currentTime,
@@ -113,7 +113,7 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
            |"subscriptionId":"sku"}}""".stripMargin
 
 
-      Json.fromJson[IncomingGoogleEvent](Json.parse(jsonString)).get shouldBe subscriptionEvent
+      Json.fromJson[DeveloperNotification](Json.parse(jsonString)).get shouldBe subscriptionDeveloperNotification
     }
 
     "Error on bad json with both keys" in {
@@ -132,9 +132,9 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
            |"version":"1.0"
            |}}""".stripMargin
 
-      Json.fromJson[IncomingGoogleEvent](Json.parse(jsonString)) shouldBe a[JsError]
+      Json.fromJson[DeveloperNotification](Json.parse(jsonString)) shouldBe a[JsError]
 
-      getFirstJsValidationError(Json.fromJson[IncomingGoogleEvent](Json.parse(jsonString)))
+      getFirstJsValidationError(Json.fromJson[DeveloperNotification](Json.parse(jsonString)))
         .get.message should include("subscription and test data")
     }
 
@@ -147,9 +147,9 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
            |"eventTimeMillis":${currentTime}
            |}""".stripMargin
 
-      Json.fromJson[IncomingGoogleEvent](Json.parse(jsonString)) shouldBe a[JsError]
+      Json.fromJson[DeveloperNotification](Json.parse(jsonString)) shouldBe a[JsError]
 
-      getFirstJsValidationError(Json.fromJson[IncomingGoogleEvent](Json.parse(jsonString)))
+      getFirstJsValidationError(Json.fromJson[DeveloperNotification](Json.parse(jsonString)))
         .get.message should include("not contain any notification")
     }
   }
