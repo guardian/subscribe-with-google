@@ -9,6 +9,8 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala, RiffRaffArtifact
 
 scalaVersion := "2.12.8"
 
+scapegoatVersion in ThisBuild := "1.3.2"
+
 val enumeratumPlayJsonVersion = "1.5.14"
 
 libraryDependencies ++= Seq(
@@ -17,10 +19,11 @@ libraryDependencies ++= Seq(
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
 )
 
-
 riffRaffPackageType := (packageZipTarball in Universal).value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 
-
 coverageExcludedPackages := "<empty>;Reverse.*;router\\.*"
+scapegoatIgnoredFiles := Seq(".*Reverse.*", ".*router.*")
+
+scapegoatDisabledInspections := Seq("FinalModifierOnCaseClass")
