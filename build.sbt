@@ -2,7 +2,9 @@
 lazy val settings = Seq(
 name := """subscribe-with-google""",
 organization := "com.gu",
-version := "1.0-SNAPSHOT")
+version := "1.0-SNAPSHOT",
+PlayKeys.playDefaultPort := 9233
+)
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, RiffRaffArtifact, UniversalPlugin)
   .settings(settings)
@@ -19,9 +21,16 @@ libraryDependencies ++= Seq(
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
 )
 
-riffRaffPackageType := (packageZipTarball in Universal).value
+enablePlugins(JavaAppPackaging, RiffRaffArtifact)
+
+topLevelDirectory in Universal := None
+packageName in Universal := normalizedName.value
+
+riffRaffPackageType := (packageBin in Universal).value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
+riffRaffArtifactResources += (file("cfn.yaml"), s"${name.value}-cfn/cfn.yaml")
+
 
 coverageExcludedPackages := "<empty>;Reverse.*;router\\.*"
 scapegoatIgnoredFiles := Seq(".*Reverse.*", ".*router.*")
