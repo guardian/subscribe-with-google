@@ -66,32 +66,8 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
             #!/bin/bash -ev
-            # get runnable tar from S3
-            aws --region ${AWS::Region} s3 cp s3://membership-dist/${Stack}/${Stage}/${App}/subscribe-with-google.tgz /tmp
-            mkdir /etc/gu
-            tar -xvzf /tmp/subscribe-with-google.tgz --directory /etc/gu/
-            # add user
-            groupadd subscribe-with-google
-            useradd -r -s /usr/bin/nologin -g subscribe-with-google subscribe-with-google
-            touch /var/log/subscribe-with-google.log
-            chown -R subscribe-with-google:subscribe-with-google /etc/gu
-            chown subscribe-with-google:subscribe-with-google /var/log/subscribe-with-google.log
-            # write out systemd file
-            cat >/etc/systemd/system/subscribe-with-google.service <<EOL
-            [Service]
-            ExecStart=/usr/bin/node /etc/gu/dist/server.js
-            Restart=always
-            StandardOutput=syslog
-            StandardError=syslog
-            SyslogIdentifier=subscribe-with-google
-            User=subscribe-with-google
-            Group=subscribe-with-google
-            [Install]
-            WantedBy=multi-user.target
-            EOL
-            # RUN
-            systemctl enable subscribe-with-google
-            systemctl start subscribe-with-google
+            aws s3 cp s3://membership-dist/support/${Stage}/${App}/${App}_1.0_all.deb /tmp
+            dpkg -i /tmp/${App}_1.0_all.deb
   AppRole:
     Type: AWS::IAM::Role
     Properties:
