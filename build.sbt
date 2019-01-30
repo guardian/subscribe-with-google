@@ -2,7 +2,7 @@
 lazy val settings = Seq(
 name := """subscribe-with-google""",
 organization := "com.gu",
-version := "1.0"
+version := "1.0",
 PlayKeys.playDefaultPort := 9233
 )
 
