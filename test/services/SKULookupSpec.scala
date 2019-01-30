@@ -25,6 +25,9 @@ class SKULookupSpec extends WordSpecLike with Matchers with ScalaFutures {
       )
     )
 
+    val timeout = Timeout(Span(500, Millis))
+    val interval = Interval(Span(25, Millis))
+
     "Retrieve and deserialise a SKU" in {
       val ws = MockWS {
         case (
@@ -47,9 +50,6 @@ class SKULookupSpec extends WordSpecLike with Matchers with ScalaFutures {
       }
 
       val skuLookup = new SKULookup(ws, configuration)
-
-      val timeout = Timeout(Span(500, Millis))
-      val interval = Interval(Span(25, Millis))
 
       whenReady(skuLookup.get("skuCode"), timeout, interval) { result =>
         result.right.get shouldBe SKU(
@@ -84,9 +84,6 @@ class SKULookupSpec extends WordSpecLike with Matchers with ScalaFutures {
       }
 
       val skuLookup = new SKULookup(ws, configuration)
-
-      val timeout = Timeout(Span(500, Millis))
-      val interval = Interval(Span(25, Millis))
 
       whenReady(skuLookup.get("skuCode"), timeout, interval) { result =>
         result.left.get shouldBe a[SKULookupDeserialisationError]
