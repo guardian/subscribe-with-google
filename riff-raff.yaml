@@ -8,7 +8,7 @@ deployments:
     type: cloud-formation
     app: subscribe-with-google
     parameters:
-      templatePath: cloudformation/cfn.yaml
+      templatePath: subscribe-with-google-cfn/cfn.yaml
       amiTags:
         Recipe: subscribe-with-google
         AmigoStage: PROD
@@ -18,4 +18,3 @@ deployments:
     dependencies: [subscribe-with-google-cloudformation]
     parameters:
       bucket: membership-dist
-      
