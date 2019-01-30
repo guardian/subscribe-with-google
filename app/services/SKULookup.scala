@@ -12,9 +12,9 @@ import model._
 
 trait HTTPClient
 
-case class SKULookupError(status: Int, message: String) extends Exception
+case class SKULookupException(status: Int, message: String) extends Exception
 
-case class SKULookupDeserialisationError(
+case class SKULookupDeserialisationErrorException(
   message: String,
   errors: Seq[(JsPath, Seq[JsonValidationError])]
 ) extends Exception
@@ -43,11 +43,11 @@ class SKULookup @Inject()(wsClient: WSClient, config: Configuration)(
       .addHttpHeaders("Authorization" -> accessToken)
       .get() map { response => {
         if (response.status != Status.OK) {
-          Left(SKULookupError(response.status, "Server error"))
+          Left(SKULookupException(response.status, "Server error"))
         } else {
           Json.parse(response.body).validate[SKU].asEither match {
             case Left(l) =>
-              Left(SKULookupDeserialisationError("Error deserialising JSON", l))
+              Left(SKULookupDeserialisationErrorException("Error deserialising JSON", l))
             case Right(r) => Right(r)
           }
         }
