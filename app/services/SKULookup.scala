@@ -2,48 +2,55 @@ package services
 
 import javax.inject._
 import play.api.Configuration
-import play.api.libs.json.{JsResultException, JsValue}
+import play.api.libs.json._
 import play.api.libs.ws._
 import play.api.Logger
+import play.api.http.Status
 
 import scala.concurrent.{ExecutionContext, Future}
 import model._
 
 trait HTTPClient
 
+case class SKULookupError(status: Int, message: String) extends Exception
+
+case class SKULookupDeserialisationError(
+  message: String,
+  errors: Seq[(JsPath, Seq[JsonValidationError])]
+) extends Exception
+
 @Singleton
-class SKULookup @Inject() (wsClient: WSClient, config: Configuration)(
+class SKULookup @Inject()(wsClient: WSClient, config: Configuration)(
   implicit executionContext: ExecutionContext
 ) extends HTTPClient {
   val logger: Logger = Logger(this.getClass())
+  val apiBaseUrl = config.get[String]("google.apiUrl")
+  val accessToken = config.get[String]("google.playDeveloperAccessToken")
 
-  def get(sku: String): Future[Either[String, SKU]] = {
-    val skuBaseUrl = config.get[String]("google.apiUrl")
-    val accessToken = config.get[String]("google.playDeveloperAccessToken")
+  def get(sku: String): Future[Either[Exception, SKU]] = {
 
     val packageName = "com.theguardian.com"
-    val url = s"$skuBaseUrl/$packageName/inappproducts/$sku"
+    val url = s"$apiBaseUrl/$packageName/inappproducts/$sku"
 
     getRequest(wsClient, url, accessToken)
   }
 
-  def getRequest(wsClient: WSClient, url: String, accessToken: String): Future[Either[String, SKU]] =
+  def getRequest(wsClient: WSClient,
+                 url: String,
+                 accessToken: String): Future[Either[Exception, SKU]] =
     wsClient
-      .url(url).addHttpHeaders("Authorization" -> accessToken)
-      .get() map { response ⇒
-        if (response.status >= 400) {
-          Left(response.body)
+      .url(url)
+      .addHttpHeaders("Authorization" -> accessToken)
+      .get() map { response => {
+        if (response.status != Status.OK) {
+          Left(SKULookupError(response.status, "Server error"))
         } else {
-          Right(response.body[JsValue].as[SKU])
+          Json.parse(response.body).validate[SKU].asEither match {
+            case Left(l) =>
+              Left(SKULookupDeserialisationError("Error deserialising JSON", l))
+            case Right(r) => Right(r)
+          }
         }
-      } recover {
-        case exception: JsResultException => {
-          val errorTitle = "Error deserialising SKU"
-          val errorMessage = exception.errors.map(err => s"field: ${err._1}, errors: ${err._2}.").mkString(" ")
-
-          logger.error(s"$errorTitle. $errorMessage")
-          Left(errorTitle)
-        }
-        case error: Exception => Left(error.toString)
       }
+    }
 }

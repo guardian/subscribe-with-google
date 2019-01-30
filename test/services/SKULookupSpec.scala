@@ -2,17 +2,20 @@ package services
 
 import mockws.MockWS
 import model._
+import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.time.{Millis, Span}
 import org.scalatest.{Matchers, WordSpecLike}
+
+import scala.concurrent.duration._
 import play.api.Configuration
 import play.api.mvc.Action
-import play.api.mvc.Results.{Ok, InternalServerError}
+import play.api.mvc.Results.{InternalServerError, Ok}
 import play.api.test.Helpers._
 
-import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SKULookupSpec extends WordSpecLike with Matchers {
+class SKULookupSpec extends WordSpecLike with Matchers with ScalaFutures {
   "SKULookup" must {
 
     val configuration = Configuration.from(
@@ -24,10 +27,12 @@ class SKULookupSpec extends WordSpecLike with Matchers {
 
     "Retrieve and deserialise a SKU" in {
       val ws = MockWS {
-        case (GET, "http://someMockUrl/com.theguardian.com/inappproducts/skuCode") =>
+        case (
+            GET,
+            "http://someMockUrl/com.theguardian.com/inappproducts/skuCode"
+            ) =>
           Action {
-            Ok(
-              s"""{"packageName": "packageName",
+            Ok(s"""{"packageName": "packageName",
                  |"sku": "skuCode",
                  |"status": "status",
                  |"purchaseType": "subscription",
@@ -37,20 +42,17 @@ class SKULookupSpec extends WordSpecLike with Matchers {
                  |"defaultLanguage": "default language",
                  |"subscriptionPeriod": "P1M",
                  |"season": {"start": {"month":1, "day":1}, "end": {"month":1, "day":1}, "prorations": [{"start": {"month":1, "day":1}, "defaultPrice": {"priceMicros": "2500000", "currency": "GBP"}}]},
-                 |"trialPeriod": "P5D"}""".stripMargin
-            )
+                 |"trialPeriod": "P5D"}""".stripMargin)
           }
       }
 
-      val skuLookup = new SKULookup(
-        ws,
-        configuration
-      )
+      val skuLookup = new SKULookup(ws, configuration)
 
-      val result = Await.result(skuLookup.get("skuCode"), 500 millis)
+      val timeout = Timeout(Span(500, Millis))
+      val interval = Interval(Span(25, Millis))
 
-      result shouldBe Right(
-        SKU(
+      whenReady(skuLookup.get("skuCode"), timeout, interval) { result =>
+        result.right.get shouldBe SKU(
           "packageName",
           "skuCode",
           "status",
@@ -67,43 +69,49 @@ class SKULookupSpec extends WordSpecLike with Matchers {
           ),
           "P5D"
         )
-      )
+      }
     }
 
     "Fail with invalid JSON" in {
       val ws = MockWS {
-        case (GET, "http://someMockUrl/com.theguardian.com/inappproducts/skuCode") =>
+        case (
+            GET,
+            "http://someMockUrl/com.theguardian.com/inappproducts/skuCode"
+            ) =>
           Action {
             Ok(s"""{"packageName": "packageName"}""")
           }
       }
 
-      val skuLookup = new SKULookup(
-        ws,
-        configuration
-      )
+      val skuLookup = new SKULookup(ws, configuration)
 
-      val result = Await.result(skuLookup.get("skuCode"), 500 millis)
+      val timeout = Timeout(Span(500, Millis))
+      val interval = Interval(Span(25, Millis))
 
-      result shouldBe Left("Error deserialising SKU")
+      whenReady(skuLookup.get("skuCode"), timeout, interval) { result =>
+        result.left.get shouldBe a[SKULookupDeserialisationError]
+      }
     }
 
     "Fail if HTTP request fails" in {
       val ws = MockWS {
-        case (GET, "http://someMockUrl/com.theguardian.com/inappproducts/skuCode") =>
+        case (
+            GET,
+            "http://someMockUrl/com.theguardian.com/inappproducts/skuCode"
+            ) =>
           Action {
             InternalServerError("Some Server Error")
           }
       }
 
-      val skuLookup = new SKULookup(
-        ws,
-        configuration
-      )
+      val skuLookup = new SKULookup(ws, configuration)
 
-      val result = Await.result(skuLookup.get("skuCode"), 500 millis)
-
-      result shouldBe Left("Some Server Error")
+      whenReady(skuLookup.get("skuCode")) { result =>
+        result.left.get shouldBe SKULookupError(
+          INTERNAL_SERVER_ERROR,
+          "Server error"
+        )
+      }
     }
   }
 }
