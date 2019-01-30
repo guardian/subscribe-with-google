@@ -8,7 +8,6 @@ deployments:
     type: cloud-formation
     app: subscribe-with-google
     parameters:
-      templatePath: subscribe-with-google-cloudformation/cfn.yaml
       amiTags:
         Recipe: subscribe-with-google
         AmigoStage: PROD
