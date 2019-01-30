@@ -27,7 +27,7 @@ packageName in Universal := normalizedName.value
 riffRaffPackageType := (packageBin in Debian).value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
-riffRaffArtifactResources += (file("cfn.yaml"), "cfn.yaml")
+riffRaffArtifactResources += (file("cfn.yaml"), "subscribe-with-google-cloudformation/cfn.yaml")
 
 coverageExcludedPackages := "<empty>;Reverse.*;router\\.*"
 scapegoatIgnoredFiles := Seq(".*Reverse.*", ".*router.*")
