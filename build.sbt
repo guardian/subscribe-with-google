@@ -27,8 +27,7 @@ packageName in Universal := normalizedName.value
 riffRaffPackageType := (packageBin in Debian).value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
-riffRaffArtifactResources += (file("cfn.yaml"), s"${name.value}-cfn/cfn.yaml")
-//add .deb to artifcat resources
+riffRaffArtifactResources += (file("cfn.yaml"), "cfn.yaml")
 
 coverageExcludedPackages := "<empty>;Reverse.*;router\\.*"
 scapegoatIgnoredFiles := Seq(".*Reverse.*", ".*router.*")
