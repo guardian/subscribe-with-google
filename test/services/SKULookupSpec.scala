@@ -86,7 +86,7 @@ class SKULookupSpec extends WordSpecLike with Matchers with ScalaFutures {
       val skuLookup = new SKULookup(ws, configuration)
 
       whenReady(skuLookup.get("skuCode"), timeout, interval) { result =>
-        result.left.get shouldBe a[SKULookupDeserialisationError]
+        result.left.get shouldBe a[SKULookupDeserialisationErrorException]
       }
     }
 
@@ -104,7 +104,7 @@ class SKULookupSpec extends WordSpecLike with Matchers with ScalaFutures {
       val skuLookup = new SKULookup(ws, configuration)
 
       whenReady(skuLookup.get("skuCode")) { result =>
-        result.left.get shouldBe SKULookupError(
+        result.left.get shouldBe SKULookupException(
           INTERNAL_SERVER_ERROR,
           "Server error"
         )
