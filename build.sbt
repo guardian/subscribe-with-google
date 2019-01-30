@@ -18,7 +18,10 @@ val enumeratumPlayJsonVersion = "1.5.14"
 libraryDependencies ++= Seq(
   guice,
   "com.beachape" %% "enumeratum-play-json" % enumeratumPlayJsonVersion,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
+  ws,
+  ehcache,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
+  "de.leanovate.play-mockws" %% "play-mockws" % "2.6.2" % Test
 )
 
 topLevelDirectory in Universal := None
