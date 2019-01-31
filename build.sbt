@@ -43,3 +43,7 @@ coverageExcludedPackages := "<empty>;Reverse.*;router\\.*"
 scapegoatIgnoredFiles := Seq(".*Reverse.*", ".*router.*")
 
 scapegoatDisabledInspections := Seq("FinalModifierOnCaseClass")
+
+javaOptions in Universal ++= Seq(
+  "-Dhttp.port=9233",
+)
