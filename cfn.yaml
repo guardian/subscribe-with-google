@@ -67,6 +67,7 @@ Resources:
         Fn::Base64: !Sub |
             #!/bin/bash -ev
             aws s3 cp s3://membership-dist/support/${Stage}/${App}/${App}_1.0_all.deb /tmp
+            export INSTANCE_ID=$(hostname -i)
             dpkg -i /tmp/${App}_1.0_all.deb
             subscribe-with-google
   AppRole:
