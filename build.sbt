@@ -1,14 +1,15 @@
 import com.typesafe.sbt.packager.archetypes.systemloader.ServerLoader.Systemd
+import PlayKeys._
 
 lazy val settings = Seq(
 name := """subscribe-with-google""",
 organization := "com.gu",
-version := "1.0",
-PlayKeys.playDefaultPort := 9233
+version := "1.0"
 )
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging)
   .settings(settings)
+  .settings(playDefaultPort := 9233)
 
 scalaVersion := "2.12.8"
 
