@@ -32,11 +32,10 @@ riffRaffPackageType := (packageBin in Debian).value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffArtifactResources += (file("cfn.yaml"), "subscribe-with-google-cloudformation/cfn.yaml")
-debianPackageDependencies := Seq("openjdk-8-jre-headless")
 serverLoading in Debian := Option(Systemd)
 maintainer := "Contribute with Google"
 packageSummary := "Contribute with Google"
-packageDescription := """Contribute with Google service - allows for integration with new subscribe and contribute with google"""
+packageDescription := """Contribute with Google service - allows for integration with subscribe and contribute with google"""
 
 
 coverageExcludedPackages := "<empty>;Reverse.*;router\\.*"
