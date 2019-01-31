@@ -1,9 +1,9 @@
 import com.google.inject.AbstractModule
-import services.{HTTPClient, SKULookup}
+import services.{HTTPClient, GoogleHTTPClient}
 
 class Module extends AbstractModule {
-  def configure() = {
+  def configure(): Unit = {
       bind(classOf[HTTPClient])
-        .to(classOf[SKULookup])
+        .to(classOf[GoogleHTTPClient])
     }
 }
