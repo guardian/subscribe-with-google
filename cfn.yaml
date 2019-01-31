@@ -23,7 +23,7 @@ Parameters:
   AMI:
     Description: AMI ID
     Type: String
-    Default: ami-04f55a1423a3d55c6
+    Default: ami-021e99cf3f971f8b0
   OfficeCIDR:
     Description: Office IP range
     Type: String
