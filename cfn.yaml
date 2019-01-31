@@ -68,7 +68,6 @@ Resources:
             #!/bin/bash -ev
             aws s3 cp s3://membership-dist/support/${Stage}/${App}/${App}_1.0_all.deb /tmp
             dpkg -i /tmp/${App}_1.0_all.deb
-            subscribe-with-google
   AppRole:
     Type: AWS::IAM::Role
     Properties:
