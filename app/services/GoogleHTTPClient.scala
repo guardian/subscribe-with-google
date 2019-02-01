@@ -6,7 +6,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.Configuration
 import play.api.libs.json._
 import play.api.libs.ws._
-import play.api.Logger
 import play.api.http.Status
 import model.{SKU, SubscriptionPurchase}
 
@@ -24,7 +23,6 @@ case class GoogleHTTPClientDeserialisationException(
 class GoogleHTTPClient @Inject()(wsClient: WSClient, config: Configuration)(
   implicit executionContext: ExecutionContext
 ) extends HTTPClient {
-  val logger: Logger = Logger(this.getClass())
 
   val packageName = config.get[String]("google.packageName")
   val apiBaseUrl = config.get[String]("google.apiUrl")
