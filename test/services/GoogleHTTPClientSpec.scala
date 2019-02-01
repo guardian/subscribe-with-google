@@ -1,12 +1,12 @@
 package services
 
+import exceptions.{GoogleHTTPClientDeserialisationException, GoogleHTTPClientException}
 import mockws.MockWS
 import model._
 import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{Matchers, WordSpecLike}
-
 import play.api.Configuration
 import play.api.mvc.Action
 import play.api.mvc.Results.{InternalServerError, Ok}
