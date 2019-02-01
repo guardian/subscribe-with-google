@@ -6,17 +6,15 @@ import model.{DeveloperNotification, GooglePushMessageWrapper}
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.Logger._
+import utils.FlattenableEither._
+
 
 @Singleton
 class PushHandlerController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
   def receivePush(): Action[AnyContent] = Action { implicit request =>
     val res = parsePushMessageBody[GooglePushMessageWrapper](request.body)
-      .map(r => resultToEither(Json.parse(r.message.decodedData).validate[DeveloperNotification])) match {
-      case Left(l) => Left(l)
-      case Right(Left(l)) => Left(l)
-      case Right(Right(r)) => Right(r)
-    } // todo : Probably write a generic flatten for Either[A, Either[A, B] && Either[Either[A, B], B]
+      .map(r => resultToEither(Json.parse(r.message.decodedData).validate[DeveloperNotification])).flatten
 
     res match {
       case Left(l) => logger.error("Unable to handle push message", l)
