@@ -25,6 +25,12 @@ object TestFixtures {
     ).getBytes)),
     "messageId")
 
+  val googlePushMessageWithInvalidBody = GooglePushMessage(Map.empty[String, String],
+    new String(Base64.getEncoder.encode(Json.asciiStringify(
+      Json.toJson("{}")
+    ).getBytes)),
+    "messageId")
+
   val googlePushMessageWrapper = GooglePushMessageWrapper(googlePushMessage, "subscription")
 
 }
