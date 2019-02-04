@@ -17,13 +17,13 @@ class PushHandlerController @Inject()(cc: ControllerComponents) extends Abstract
       .map(r => resultToEither(Json.parse(r.message.decodedData).validate[DeveloperNotification])).flatten
 
     res match {
-      case Left(l) => logger.error("Unable to handle push message", l)
-      case Right(r) => logger.info(s"Received $r")
+      case Left(l) =>
+        logger.error("Unable to handle push message", l)
+        BadRequest
+      case Right(r) =>
+        logger.info(s"Received $r")
+        NoContent
     }
-
-
-    //todo: Confirm this is desired
-    NoContent
   }
 
   private def parsePushMessageBody[A: Reads](body: AnyContent): Either[Exception, A] = {
