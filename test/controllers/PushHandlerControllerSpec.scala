@@ -28,7 +28,7 @@ class PushHandlerControllerSpec extends WordSpecLike with Matchers with GuiceOne
         .withJsonBody(Json.toJson(TestFixtures.googlePushMessageWithInvalidBody)))
 
 
-      status(action) shouldBe NO_CONTENT
+      status(action) shouldBe BAD_REQUEST
     }
 
     "handle an empty request body" in {
@@ -36,7 +36,7 @@ class PushHandlerControllerSpec extends WordSpecLike with Matchers with GuiceOne
 
       val action = controller.receivePush().apply(FakeRequest("POST", "/push/handle-message"))
 
-      status(action) shouldBe NO_CONTENT
+      status(action) shouldBe BAD_REQUEST
     }
 
   }
