@@ -25,8 +25,10 @@ case class TestDeveloperNotification(version: String,
 
 object DeveloperNotification {
 
-  implicit val formatSubscriptionEvent = Json.format[SubscriptionDeveloperNotification]
-  implicit val formatTestEvent = Json.format[TestDeveloperNotification]
+  implicit val formatSubscriptionEvent: Format[SubscriptionDeveloperNotification] =
+    Json.format[SubscriptionDeveloperNotification]
+
+  implicit val formatTestEvent: Format[TestDeveloperNotification] = Json.format[TestDeveloperNotification]
 
   implicit val writes: Writes[DeveloperNotification] = new Writes[DeveloperNotification] {
     override def writes(o: DeveloperNotification): JsValue = {

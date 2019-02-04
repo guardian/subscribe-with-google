@@ -1,30 +1,21 @@
 package services
 
+import exceptions.{GoogleHTTPClientDeserialisationException, GoogleHTTPClientException}
 import javax.inject._
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.Configuration
 import play.api.libs.json._
 import play.api.libs.ws._
-import play.api.Logger
 import play.api.http.Status
 import model.{SKU, SubscriptionPurchase}
 
 trait HTTPClient
 
-case class GoogleHTTPClientException(status: Int, message: String)
-    extends Exception
-
-case class GoogleHTTPClientDeserialisationException(
-  message: String,
-  errors: Seq[(JsPath, Seq[JsonValidationError])]
-) extends Exception
-
 @Singleton
 class GoogleHTTPClient @Inject()(wsClient: WSClient, config: Configuration)(
   implicit executionContext: ExecutionContext
 ) extends HTTPClient {
-  val logger: Logger = Logger(this.getClass())
 
   val packageName = config.get[String]("google.packageName")
   val apiBaseUrl = config.get[String]("google.apiUrl")
