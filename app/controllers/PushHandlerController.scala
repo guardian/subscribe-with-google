@@ -1,5 +1,7 @@
 package controllers
 
+import java.nio.channels.NonReadableChannelException
+
 import exceptions.{DeserializationException, NonJsonBodyException}
 import javax.inject.{Inject, Singleton}
 import model.{DeveloperNotification, GooglePushMessageWrapper}
@@ -17,9 +19,12 @@ class PushHandlerController @Inject()(cc: ControllerComponents) extends Abstract
       .map(r => resultToEither(Json.parse(r.message.decodedData).validate[DeveloperNotification])).flatten
 
     res match {
-      case Left(l) =>
+      case Left(l: NonJsonBodyException) =>
         logger.error("Unable to handle push message", l)
         BadRequest
+      case Left(l) =>
+        logger.error("Failure to deserialise to developer notification")
+        NoContent //to guard against spamming failures back for now
       case Right(r) =>
         logger.info(s"Received $r")
         NoContent
