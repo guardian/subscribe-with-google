@@ -13,7 +13,7 @@ import play.api.libs.ws.WSClient
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AccessTokenClient {
-  def get(): Future[Either[Exception, GoogleAccessToken]]
+  def get(): Future[GoogleAccessToken]
 }
 
 @Singleton
@@ -29,7 +29,7 @@ class GoogleAccessTokenClient @Inject()(
   val swgClientSecret = config.get[String]("swg.clientSecret")
   val swgRedirectUri = config.get[String]("swg.redirectUri")
 
-  def get(): Future[Either[Exception, GoogleAccessToken]] = {
+  def get(): Future[GoogleAccessToken] = {
     val cache: AsyncLoadingCache[String, GoogleAccessToken] =
       Scaffeine()
         .recordStats()
@@ -44,16 +44,13 @@ class GoogleAccessTokenClient @Inject()(
             currentDuration
         )
         .buildAsyncFuture[String, GoogleAccessToken](
-          (_: String) => getAccessTokenRequest() map {
-            case Right(r) => r
-            case Left(l) => throw l
-          }
+          (_: String) => getAccessTokenRequest()
         )
 
     cache.get("accessToken")
   }
 
-  def getAccessTokenRequest(): Future[Either[Exception, GoogleAccessToken]] = {
+  def getAccessTokenRequest(): Future[GoogleAccessToken] = {
     val params = Seq(
       "grant_type" -> "refresh_token",
       "refresh_token" -> refreshToken,
@@ -68,19 +65,15 @@ class GoogleAccessTokenClient @Inject()(
       .get() map { response =>
       {
         if (response.status != Status.OK) {
-          Left(GoogleHTTPClientException(response.status, "Server error"))
+          throw GoogleHTTPClientException(response.status, "Server error")
         } else {
           Json.parse(response.body).validate[GoogleAccessToken].asEither match {
             case Left(l) =>
-              Left(
-                DeserializationException(
-                  "Error deserialising Google access token JSON",
-                  l
-                )
+              throw DeserializationException(
+                "Error deserialising Google access token JSON",
+                l
               )
-            case Right(r) => {
-              Right(r)
-            }
+            case Right(r) => r
           }
         }
       }

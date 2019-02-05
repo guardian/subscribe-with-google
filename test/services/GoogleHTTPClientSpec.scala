@@ -22,7 +22,7 @@ class GoogleHTTPClientSpec
     with MockWSHelper {
 
   class MockAccessTokenClient extends AccessTokenClient {
-    def get() = Future.successful(Right("someAccessToken"))
+    def get() = Future.successful(GoogleAccessToken("someAccessToken", 1, "someScope", "someType"))
   }
 
   val mockAccessTokenClient = new MockAccessTokenClient()
@@ -63,7 +63,7 @@ class GoogleHTTPClientSpec
 
       whenReady(googleHttpClient.getSKU("skuCode"), timeout, interval) {
         result =>
-          result.right.get shouldBe SKU(
+          result shouldBe SKU(
             "packageName",
             "skuCode",
             "status",
@@ -96,9 +96,9 @@ class GoogleHTTPClientSpec
 
       val googleHttpClient = new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
-      whenReady(googleHttpClient.getSKU("skuCode"), timeout, interval) {
+      whenReady(googleHttpClient.getSKU("skuCode") failed, timeout, interval) {
         result =>
-          result.left.get shouldBe a[GoogleHTTPClientDeserialisationException]
+          result shouldBe an [GoogleHTTPClientDeserialisationException]
       }
     }
 
@@ -115,8 +115,8 @@ class GoogleHTTPClientSpec
 
       val googleHttpClient = new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
-      whenReady(googleHttpClient.getSKU("skuCode")) { result =>
-        result.left.get shouldBe GoogleHTTPClientException(
+      whenReady(googleHttpClient.getSKU("skuCode") failed) { result =>
+        result shouldBe GoogleHTTPClientException(
           INTERNAL_SERVER_ERROR,
           "Server error"
         )
@@ -182,7 +182,7 @@ class GoogleHTTPClientSpec
         timeout,
         interval
       ) { result =>
-        result.right.get shouldBe SubscriptionPurchase(
+        result shouldBe SubscriptionPurchase(
           "androidpublisher#subscriptionPurchase",
           1,
           1,
@@ -222,11 +222,11 @@ class GoogleHTTPClientSpec
 
       whenReady(
         googleHttpClient
-          .getSubscriptionPurchase("someProductId", "somePurchaseToken"),
+          .getSubscriptionPurchase("someProductId", "somePurchaseToken") failed,
         timeout,
         interval
       ) { result =>
-        result.left.get shouldBe a[GoogleHTTPClientDeserialisationException]
+        result shouldBe a[GoogleHTTPClientDeserialisationException]
       }
     }
 
@@ -245,9 +245,9 @@ class GoogleHTTPClientSpec
 
       whenReady(
         subPurchaseLookup
-          .getSubscriptionPurchase("someProductId", "somePurchaseToken")
+          .getSubscriptionPurchase("someProductId", "somePurchaseToken") failed
       ) { result =>
-        result.left.get shouldBe GoogleHTTPClientException(
+        result shouldBe GoogleHTTPClientException(
           INTERNAL_SERVER_ERROR,
           "Server error"
         )

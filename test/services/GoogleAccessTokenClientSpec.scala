@@ -48,9 +48,8 @@ class GoogleAccessTokenClientSpec
       val googleAccessTokenClient =
         new GoogleAccessTokenClient(ws, configuration)
 
-      whenReady(googleAccessTokenClient.get(), timeout, interval) {
-        case Left(l) => fail(l)
-        case Right(r) => r shouldBe "someAccessToken"
+      whenReady(googleAccessTokenClient.get(), timeout, interval) { response =>
+        response.accessToken shouldBe "someAccessToken"
       }
     }
 
@@ -67,9 +66,9 @@ class GoogleAccessTokenClientSpec
       val googleAccessTokenClient =
         new GoogleAccessTokenClient(ws, configuration)
 
-      whenReady(googleAccessTokenClient.get(), timeout, interval) {
-        result =>
-          result.left.get shouldBe a[DeserializationException]
+      whenReady(googleAccessTokenClient.get() failed, timeout, interval) {
+        response =>
+          response shouldBe an [DeserializationException]
       }
     }
 
@@ -84,8 +83,8 @@ class GoogleAccessTokenClientSpec
       val googleAccessTokenClient =
         new GoogleAccessTokenClient(ws, configuration)
 
-      whenReady(googleAccessTokenClient.get()) { result =>
-        result.left.get shouldBe GoogleHTTPClientException(
+      whenReady(googleAccessTokenClient.get() failed) { result =>
+        result shouldBe GoogleHTTPClientException(
           INTERNAL_SERVER_ERROR,
           "Server error"
         )

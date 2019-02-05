@@ -20,13 +20,13 @@ class GoogleHTTPClient @Inject()(wsClient: WSClient, accessTokenClient: AccessTo
 
   val packageName = config.get[String]("google.packageName")
 
-  def getSKU(sku: String): Future[Either[Exception, SKU]] =
+  def getSKU(sku: String): Future[SKU] =
     getRequest[SKU](wsClient, s"inappproducts/$sku")
 
   def getSubscriptionPurchase(
     productId: String,
     purchaseToken: String
-  ): Future[Either[Exception, SubscriptionPurchase]] =
+  ): Future[SubscriptionPurchase] =
     getRequest[SubscriptionPurchase](
       wsClient,
       s"purchases/subscriptions/$productId/tokens/$purchaseToken"
@@ -35,13 +35,11 @@ class GoogleHTTPClient @Inject()(wsClient: WSClient, accessTokenClient: AccessTo
   def getRequest[A: Reads](
     wsClient: WSClient,
     relativeUrl: String
-  ): Future[Either[Exception, A]] = {
+  ): Future[A] = {
     val url = s"$apiBaseUrl/$packageName/$relativeUrl"
 
-    accessTokenClient.get() flatMap {
-      case Right(accessToken: GoogleAccessToken) =>
-        getRequestWithAccessToken[A](wsClient, url, accessToken.accessToken)
-      case Left(l) => Future.successful(Left(l))
+    accessTokenClient.get() flatMap { accessToken =>
+      getRequestWithAccessToken[A](wsClient, url, accessToken.accessToken)
     }
   }
 
@@ -49,24 +47,22 @@ class GoogleHTTPClient @Inject()(wsClient: WSClient, accessTokenClient: AccessTo
     wsClient: WSClient,
     url: String,
     accessToken: String
-  ): Future[Either[Exception, A]] = {
+  ): Future[A] = {
     wsClient
       .url(url)
       .addHttpHeaders("Authorization" -> accessToken)
       .get() map { response =>
       {
         if (response.status != Status.OK) {
-          Left(GoogleHTTPClientException(response.status, "Server error"))
+          throw GoogleHTTPClientException(response.status, "Server error")
         } else {
           Json.parse(response.body).validate[A].asEither match {
             case Left(l) =>
-              Left(
-                GoogleHTTPClientDeserialisationException(
-                  "Error deserialising JSON",
-                  l
-                )
+              throw GoogleHTTPClientDeserialisationException(
+                "Error deserialising JSON",
+                l
               )
-            case Right(r) => Right(r)
+            case Right(r) => r
           }
         }
       }
