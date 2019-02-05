@@ -20,7 +20,7 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
         1549369095263L,
         subscriptionNotification)
 
-      val jsValue = Json.parse("""{"version":"1.0","packageName":"com.guardian","eventTimeMillis":1549369095263,"subscriptionNotification":{"version":"1.0","notificationType":2,"purchaseToken":"","subscriptionId":"uk.co.guardian.subscription"}}""")
+      val jsValue = Json.parse("""{"version":"1.0","packageName":"com.guardian","eventTimeMillis":"1549369095263","subscriptionNotification":{"version":"1.0","notificationType":2,"purchaseToken":"","subscriptionId":"uk.co.guardian.subscription"}}""")
       Json.stringify(Json.toJson[DeveloperNotification](subscriptionDeveloperNotification)) shouldBe Json.stringify(jsValue)
 
     }
@@ -40,7 +40,7 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
       val jsValue = Json.parse(
         s"""{"version":"1.0",
            |"packageName":"com.gu",
-           |"eventTimeMillis":${currentTime},
+           |"eventTimeMillis":"$currentTime",
            |"testNotification":{
            |"version":"1.0"
            |}

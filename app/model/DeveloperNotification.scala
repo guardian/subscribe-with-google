@@ -40,8 +40,23 @@ object DeveloperNotification {
       (__ \ "testNotification").read[TestNotification]) (TestDeveloperNotification.apply _)
   }.reads(json)
 
-  implicit val writeSubscriptionEvent: Writes[SubscriptionDeveloperNotification] = Json.writes[SubscriptionDeveloperNotification]
-  implicit val writeSTestEvent: Writes[TestDeveloperNotification] = Json.writes[TestDeveloperNotification]
+  implicit val writeSubscriptionEvent: Writes[SubscriptionDeveloperNotification] = new Writes[SubscriptionDeveloperNotification] {
+    override def writes(o: SubscriptionDeveloperNotification): JsValue = {
+      Json.obj("version" -> o.version,
+        "packageName" -> o.packageName,
+        "eventTimeMillis" -> o.eventTimeMillis.toString,
+        "subscriptionNotification" -> Json.toJson(o.subscriptionNotification)
+      )
+    }
+  }
+
+  implicit val writeTestEvent: Writes[TestDeveloperNotification] = (o: TestDeveloperNotification) => {
+    Json.obj("version" -> o.version,
+      "packageName" -> o.packageName,
+      "eventTimeMillis" -> o.eventTimeMillis.toString,
+      "testNotification" -> Json.toJson(o.testNotification)
+    )
+  }
 
   implicit val writes: Writes[DeveloperNotification] = new Writes[DeveloperNotification] {
     override def writes(o: DeveloperNotification): JsValue = {
