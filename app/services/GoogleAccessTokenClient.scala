@@ -1,7 +1,10 @@
 package services
-import exceptions.{DeserializationException, GoogleHTTPClientDeserialisationException, GoogleHTTPClientException}
+
+import com.github.blemale.scaffeine.{AsyncLoadingCache, Scaffeine}
+import exceptions.{DeserializationException, GoogleHTTPClientException}
 import javax.inject.{Inject, Singleton}
 import model.GoogleAccessToken
+import scala.concurrent.duration._
 import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.Json
@@ -10,7 +13,7 @@ import play.api.libs.ws.WSClient
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AccessTokenClient {
-  def get(): Future[Either[Exception, String]]
+  def get(): Future[Either[Exception, GoogleAccessToken]]
 }
 
 @Singleton
@@ -26,7 +29,31 @@ class GoogleAccessTokenClient @Inject()(
   val swgClientSecret = config.get[String]("swg.clientSecret")
   val swgRedirectUri = config.get[String]("swg.redirectUri")
 
-  def get(): Future[Either[Exception, String]] = {
+  def get(): Future[Either[Exception, GoogleAccessToken]] = {
+    val cache: AsyncLoadingCache[String, GoogleAccessToken] =
+      Scaffeine()
+        .recordStats()
+        .maximumSize(1)
+        .expireAfter(
+          create = (_: String, accessToken: GoogleAccessToken) =>
+            accessToken.expiresIn seconds,
+          update =
+            (_: String, _: GoogleAccessToken, currentDuration: Duration) =>
+              currentDuration,
+          read = (_: String, _: GoogleAccessToken, currentDuration: Duration) =>
+            currentDuration
+        )
+        .buildAsyncFuture[String, GoogleAccessToken](
+          (_: String) => getAccessTokenRequest() map {
+            case Right(r) => r
+            case Left(l) => throw l
+          }
+        )
+
+    cache.get("accessToken")
+  }
+
+  def getAccessTokenRequest(): Future[Either[Exception, GoogleAccessToken]] = {
     val params = Seq(
       "grant_type" -> "refresh_token",
       "refresh_token" -> refreshToken,
@@ -51,7 +78,9 @@ class GoogleAccessTokenClient @Inject()(
                   l
                 )
               )
-            case Right(r) => Right(r.accessToken)
+            case Right(r) => {
+              Right(r)
+            }
           }
         }
       }

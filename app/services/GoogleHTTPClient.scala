@@ -1,9 +1,6 @@
 package services
 
-import exceptions.{
-  GoogleHTTPClientDeserialisationException,
-  GoogleHTTPClientException
-}
+import exceptions.{GoogleHTTPClientDeserialisationException, GoogleHTTPClientException}
 import javax.inject._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -11,7 +8,7 @@ import play.api.Configuration
 import play.api.libs.json._
 import play.api.libs.ws._
 import play.api.http.Status
-import model.{SKU, SubscriptionPurchase}
+import model.{GoogleAccessToken, SKU, SubscriptionPurchase}
 
 trait HTTPClient
 
@@ -42,8 +39,8 @@ class GoogleHTTPClient @Inject()(wsClient: WSClient, accessTokenClient: AccessTo
     val url = s"$apiBaseUrl/$packageName/$relativeUrl"
 
     accessTokenClient.get() flatMap {
-      case Right(accessToken: String) =>
-        getRequestWithAccessToken[A](wsClient, url, accessToken)
+      case Right(accessToken: GoogleAccessToken) =>
+        getRequestWithAccessToken[A](wsClient, url, accessToken.accessToken)
       case Left(l) => Future.successful(Left(l))
     }
   }
