@@ -1,6 +1,9 @@
 package services
 
-import exceptions.{GoogleHTTPClientDeserialisationException, GoogleHTTPClientException}
+import exceptions.{
+  GoogleHTTPClientDeserialisationException,
+  GoogleHTTPClientException
+}
 import javax.inject._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -13,37 +16,48 @@ import model.{SKU, SubscriptionPurchase}
 trait HTTPClient
 
 @Singleton
-class GoogleHTTPClient @Inject()(wsClient: WSClient, config: Configuration)(
+class GoogleHTTPClient @Inject()(wsClient: WSClient, accessTokenClient: AccessTokenClient, config: Configuration)(
   implicit executionContext: ExecutionContext
 ) extends HTTPClient {
+  val apiBaseUrl = "https://www.googleapis.com/androidpublisher/v3/applications"
 
   val packageName = config.get[String]("google.packageName")
-  val apiBaseUrl = config.get[String]("google.apiUrl")
-  val accessToken = config.get[String]("google.playDeveloperAccessToken")
 
-  def getSKU(sku: String): Future[Either[Exception, SKU]] = {
-    val url = s"$apiBaseUrl/$packageName/inappproducts/$sku"
-
-    getRequest[SKU](wsClient, url, accessToken)
-  }
+  def getSKU(sku: String): Future[Either[Exception, SKU]] =
+    getRequest[SKU](wsClient, s"inappproducts/$sku")
 
   def getSubscriptionPurchase(
     productId: String,
     purchaseToken: String
-  ): Future[Either[Exception, SubscriptionPurchase]] = {
-    val url =
-      s"$apiBaseUrl/$packageName/purchases/subscriptions/$productId/tokens/$purchaseToken"
+  ): Future[Either[Exception, SubscriptionPurchase]] =
+    getRequest[SubscriptionPurchase](
+      wsClient,
+      s"purchases/subscriptions/$productId/tokens/$purchaseToken"
+    )
 
-    getRequest[SubscriptionPurchase](wsClient, url, accessToken)
+  def getRequest[A: Reads](
+    wsClient: WSClient,
+    relativeUrl: String
+  ): Future[Either[Exception, A]] = {
+    val url = s"$apiBaseUrl/$packageName/$relativeUrl"
+
+    accessTokenClient.get() flatMap {
+      case Right(accessToken: String) =>
+        getRequestWithAccessToken[A](wsClient, url, accessToken)
+      case Left(l) => Future.successful(Left(l))
+    }
   }
 
-  def getRequest[A: Reads](wsClient: WSClient,
-                           url: String,
-                           accessToken: String): Future[Either[Exception, A]] =
+  def getRequestWithAccessToken[A: Reads](
+    wsClient: WSClient,
+    url: String,
+    accessToken: String
+  ): Future[Either[Exception, A]] = {
     wsClient
       .url(url)
       .addHttpHeaders("Authorization" -> accessToken)
-      .get() map { response => {
+      .get() map { response =>
+      {
         if (response.status != Status.OK) {
           Left(GoogleHTTPClientException(response.status, "Server error"))
         } else {
@@ -60,4 +74,5 @@ class GoogleHTTPClient @Inject()(wsClient: WSClient, config: Configuration)(
         }
       }
     }
+  }
 }
