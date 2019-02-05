@@ -23,7 +23,7 @@ class PushHandlerController @Inject()(cc: ControllerComponents) extends Abstract
         logger.error("Unable to handle push message", l)
         BadRequest
       case Left(l) =>
-        logger.error("Failure to deserialise to developer notification", l)
+        logger.error(s"Failure to deserialise to developer notification: ${request.body.toString}", l)
         NoContent //to guard against spamming failures back for now
       case Right(r) =>
         logger.info(s"Received $r")
