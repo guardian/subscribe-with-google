@@ -8,13 +8,13 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{Matchers, WordSpecLike}
 import play.api.Configuration
-import play.api.mvc.Action
 import play.api.mvc.Results.{InternalServerError, Ok}
 import play.api.test.Helpers._
+import utils.MockWSHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures {
+class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures with MockWSHelper {
   "SKUs" must {
 
     val configuration = Configuration.from(
