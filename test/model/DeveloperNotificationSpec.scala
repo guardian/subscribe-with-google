@@ -9,30 +9,19 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
     "Serialize a developer subscription notification" in {
 
       val subscriptionNotification = SubscriptionNotification("1.0",
-        NotificationType.SubscriptionPurchased,
-        "purchaseID",
-        "sku")
+        NotificationType.SubscriptionRenewed,
+        "",
+        "uk.co.guardian.subscription")
 
       val currentTime = System.currentTimeMillis()
       val subscriptionDeveloperNotification: DeveloperNotification = SubscriptionDeveloperNotification(
         "1.0",
-        "com.gu",
-        currentTime,
+        "com.guardian",
+        1549369095263L,
         subscriptionNotification)
 
-
-      val jsValue = Json.parse(
-        s"""{"version":"1.0",
-           |"packageName":"com.gu",
-           |"eventTimeMillis":${currentTime},
-           |"subscriptionNotification":{
-           |"version":"1.0",
-           |"notificationType":4,
-           |"purchaseToken":"purchaseID",
-           |"subscriptionId":"sku"}}""".stripMargin
-      )
-
-      Json.toJson[DeveloperNotification](subscriptionDeveloperNotification) shouldBe jsValue
+      val jsValue = Json.parse("""{"version":"1.0","packageName":"com.guardian","eventTimeMillis":1549369095263,"subscriptionNotification":{"version":"1.0","notificationType":2,"purchaseToken":"","subscriptionId":"uk.co.guardian.subscription"}}""")
+      Json.stringify(Json.toJson[DeveloperNotification](subscriptionDeveloperNotification)) shouldBe Json.stringify(jsValue)
 
     }
 
@@ -76,7 +65,7 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
       val jsonString =
         s"""{"version":"1.0",
            |"packageName":"com.gu",
-           |"eventTimeMillis":${currentTime},
+           |"eventTimeMillis":"$currentTime",
            |"testNotification":{
            |"version":"1.0"
            |}
@@ -104,7 +93,7 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
       val jsonString =
         s"""{"version":"1.0",
            |"packageName":"com.gu",
-           |"eventTimeMillis":${currentTime},
+           |"eventTimeMillis":"$currentTime",
            |"subscriptionNotification":{
            |"version":"1.0",
            |"notificationType":6,
@@ -121,7 +110,7 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
       val jsonString =
         s"""{"version":"1.0",
            |"packageName":"com.gu",
-           |"eventTimeMillis":${currentTime},
+           |"eventTimeMillis":"$currentTime",
            |"subscriptionNotification":{
            |"version":"1.0",
            |"notificationType":6,
@@ -143,7 +132,7 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
       val jsonString =
         s"""{"version":"1.0",
            |"packageName":"com.gu",
-           |"eventTimeMillis":${currentTime}
+           |"eventTimeMillis":"$currentTime"
            |}""".stripMargin
 
       Json.fromJson[DeveloperNotification](Json.parse(jsonString)) shouldBe a[JsError]

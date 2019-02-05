@@ -1,6 +1,7 @@
 package model
 
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 sealed trait DeveloperNotification {
   val version: String
@@ -25,10 +26,22 @@ case class TestDeveloperNotification(version: String,
 
 object DeveloperNotification {
 
-  implicit val formatSubscriptionEvent: Format[SubscriptionDeveloperNotification] =
-    Json.format[SubscriptionDeveloperNotification]
+  implicit val readSubscriptionEvent: Reads[SubscriptionDeveloperNotification] = (json: JsValue) => {
+    ((__ \ "version").read[String] and
+      (__ \ "packageName").read[String] and
+      (__ \ "eventTimeMillis").read[String].map[Long](_.toLong) and
+      (__ \ "subscriptionNotification").read[SubscriptionNotification]) (SubscriptionDeveloperNotification.apply _)
+  }.reads(json)
 
-  implicit val formatTestEvent: Format[TestDeveloperNotification] = Json.format[TestDeveloperNotification]
+  implicit val readTestSubscriptionEvent: Reads[TestDeveloperNotification] = (json: JsValue) => {
+    ((__ \ "version").read[String] and
+      (__ \ "packageName").read[String] and
+      (__ \ "eventTimeMillis").read[String].map[Long](_.toLong) and
+      (__ \ "testNotification").read[TestNotification]) (TestDeveloperNotification.apply _)
+  }.reads(json)
+
+  implicit val writeSubscriptionEvent: Writes[SubscriptionDeveloperNotification] = Json.writes[SubscriptionDeveloperNotification]
+  implicit val writeSTestEvent: Writes[TestDeveloperNotification] = Json.writes[TestDeveloperNotification]
 
   implicit val writes: Writes[DeveloperNotification] = new Writes[DeveloperNotification] {
     override def writes(o: DeveloperNotification): JsValue = {
