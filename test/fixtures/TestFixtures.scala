@@ -16,20 +16,21 @@ object TestFixtures {
   val developerNotificationWithSubscription: DeveloperNotification = SubscriptionDeveloperNotification("1.0",
     "com.gu",
     1L,
-    subscriptionNotification
-  )
+    subscriptionNotification)
 
-  val googlePushMessage = GooglePushMessage(Map.empty[String, String],
+  val googlePushMessage = GooglePushMessage(None,
     new String(Base64.getEncoder.encode(Json.asciiStringify(
     Json.toJson(developerNotificationWithSubscription)
     ).getBytes)),
-    "messageId")
+    "messageId",
+    "")
 
-  val googlePushMessageWithInvalidBody = GooglePushMessage(Map.empty[String, String],
+  val googlePushMessageWithInvalidBody = GooglePushMessage(None,
     new String(Base64.getEncoder.encode(Json.asciiStringify(
       Json.toJson("{}")
     ).getBytes)),
-    "messageId")
+    "messageId",
+    "")
 
   val googlePushMessageWrapper = GooglePushMessageWrapper(googlePushMessage, "subscription")
 

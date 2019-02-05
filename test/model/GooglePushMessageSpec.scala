@@ -16,9 +16,9 @@ class GooglePushMessageSpec extends WordSpecLike with Matchers {
 
         val jsonStr = s"""{
                         |  "message" : {
-                        |    "attributes" : {},
                         |    "data" : "$base64Str",
-                        |    "messageId" : "messageId"
+                        |    "messageId" : "messageId",
+                        |    "publishTime" : ""
                         |  },
                         |  "subscription" : "subscription"
                         |}""".stripMargin
