@@ -29,24 +29,24 @@ class GoogleAccessTokenClient @Inject()(
   val swgClientSecret = config.get[String]("swg.clientSecret")
   val swgRedirectUri = config.get[String]("swg.redirectUri")
 
-  def get(): Future[GoogleAccessToken] = {
-    val cache: AsyncLoadingCache[String, GoogleAccessToken] =
-      Scaffeine()
-        .recordStats()
-        .maximumSize(1)
-        .expireAfter(
-          create = (_: String, accessToken: GoogleAccessToken) =>
-            accessToken.expiresIn seconds,
-          update =
-            (_: String, _: GoogleAccessToken, currentDuration: Duration) =>
-              currentDuration,
-          read = (_: String, _: GoogleAccessToken, currentDuration: Duration) =>
-            currentDuration
-        )
-        .buildAsyncFuture[String, GoogleAccessToken](
-          (_: String) => getAccessTokenRequest()
-        )
+  val cache: AsyncLoadingCache[String, GoogleAccessToken] =
+    Scaffeine()
+      .recordStats()
+      .maximumSize(1)
+      .expireAfter(
+        create = (_: String, accessToken: GoogleAccessToken) =>
+          accessToken.expiresIn seconds,
+        update =
+          (_: String, _: GoogleAccessToken, currentDuration: Duration) =>
+            currentDuration,
+        read = (_: String, _: GoogleAccessToken, currentDuration: Duration) =>
+          currentDuration
+      )
+      .buildAsyncFuture[String, GoogleAccessToken](
+        (_: String) => getAccessTokenRequest()
+      )
 
+  def get(): Future[GoogleAccessToken] = {
     cache.get("accessToken")
   }
 

@@ -1,7 +1,7 @@
 package services
 
 import exceptions.{DeserializationException, GoogleHTTPClientDeserialisationException, GoogleHTTPClientException}
-import mockws.MockWS
+import mockws.{MockWS, Route}
 import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
@@ -51,6 +51,31 @@ class GoogleAccessTokenClientSpec
       whenReady(googleAccessTokenClient.get(), timeout, interval) { response =>
         response.accessToken shouldBe "someAccessToken"
       }
+    }
+
+    "Subsequent retrieval uses cache" in {
+      val route = Route {
+        case (GET, "https://accounts.google.com/o/oauth2/token") =>
+          Action {
+            Ok(s"""{
+                  |"access_token": "someAccessToken",
+                  |"expires_in": 3600,
+                  |"scope": "https://www.googleapis.com/auth/androidpublisher",
+                  |"token_type": "Bearer"
+                  |}""".stripMargin)
+          }
+      }
+
+      val ws = MockWS(route)
+
+      val googleAccessTokenClient =
+        new GoogleAccessTokenClient(ws, configuration)
+
+      await(googleAccessTokenClient.get())
+
+      await(googleAccessTokenClient.get())
+
+      route.timeCalled shouldBe 1
     }
 
     "Fail with invalid JSON" in {
