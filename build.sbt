@@ -21,7 +21,7 @@ libraryDependencies ++= Seq(
   guice,
   "com.beachape" %% "enumeratum-play-json" % enumeratumPlayJsonVersion,
   ws,
-  ehcache,
+  caffeine,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
   "de.leanovate.play-mockws" %% "play-mockws" % "2.6.2" % Test
 )
