@@ -1,6 +1,7 @@
 package services
 
-import exceptions.{GoogleHTTPClientDeserialisationException, GoogleHTTPClientException}
+import exceptions.{
+  GoogleHTTPClientDeserializationException, GoogleHTTPClientException}
 import mockws.MockWS
 import model._
 import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
@@ -98,7 +99,7 @@ class GoogleHTTPClientSpec
 
       whenReady(googleHttpClient.getSKU("skuCode") failed, timeout, interval) {
         result =>
-          result shouldBe an [GoogleHTTPClientDeserialisationException]
+          result shouldBe an[GoogleHTTPClientDeserializationException]
       }
     }
 
@@ -226,7 +227,7 @@ class GoogleHTTPClientSpec
         timeout,
         interval
       ) { result =>
-        result shouldBe a[GoogleHTTPClientDeserialisationException]
+        result shouldBe a[GoogleHTTPClientDeserializationException]
       }
     }
 
