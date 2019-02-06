@@ -1,6 +1,6 @@
 package services
 
-import exceptions.{DeserializationException, GoogleHTTPClientDeserialisationException, GoogleHTTPClientException}
+import exceptions.{DeserializationException, GoogleHTTPClientDeserializationException, GoogleHTTPClientException}
 import mockws.{MockWS, Route}
 import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
 import org.scalatest.concurrent.ScalaFutures
