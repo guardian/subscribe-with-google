@@ -8,20 +8,30 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{Matchers, WordSpecLike}
 import play.api.Configuration
-import play.api.mvc.Action
 import play.api.mvc.Results.{InternalServerError, Ok}
 import play.api.test.Helpers._
+import utils.MockWSHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures {
+class GoogleHTTPClientSpec
+    extends WordSpecLike
+    with Matchers
+    with ScalaFutures
+    with MockWSHelper {
+
+  class MockAccessTokenClient extends AccessTokenClient {
+    def get() = Future.successful(GoogleAccessToken("someAccessToken", 1, "someScope", "someType"))
+  }
+
+  val mockAccessTokenClient = new MockAccessTokenClient()
+
   "SKUs" must {
 
     val configuration = Configuration.from(
       Map(
         "google.packageName" -> "somePackageName",
-        "google.apiUrl" -> "http://someMockUrl",
-        "google.playDeveloperAccessToken" -> "someAccessToken"
       )
     )
 
@@ -32,7 +42,7 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
       val ws = MockWS {
         case (
             GET,
-            "http://someMockUrl/somePackageName/inappproducts/skuCode"
+            "https://www.googleapis.com/androidpublisher/v3/applications/somePackageName/inappproducts/skuCode"
             ) =>
           Action {
             Ok(s"""{"packageName": "packageName",
@@ -49,26 +59,27 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
           }
       }
 
-      val googleHttpClient = new GoogleHTTPClient(ws, configuration)
+      val googleHttpClient = new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
-      whenReady(googleHttpClient.getSKU("skuCode"), timeout, interval) { result =>
-        result.right.get shouldBe SKU(
-          "packageName",
-          "skuCode",
-          "status",
-          "subscription",
-          Price("2500000", "GBP"),
-          Map("GB" -> Price("2500000", "GBP")),
-          Map("en-GB" -> Listing("title", "description")),
-          "default language",
-          "P1M",
-          Season(
-            SeasonDate(1, 1),
-            SeasonDate(1, 1),
-            Some(List(Proration(SeasonDate(1, 1), Price("2500000", "GBP"))))
-          ),
-          "P5D"
-        )
+      whenReady(googleHttpClient.getSKU("skuCode"), timeout, interval) {
+        result =>
+          result shouldBe SKU(
+            "packageName",
+            "skuCode",
+            "status",
+            "subscription",
+            Price("2500000", "GBP"),
+            Map("GB" -> Price("2500000", "GBP")),
+            Map("en-GB" -> Listing("title", "description")),
+            "default language",
+            "P1M",
+            Season(
+              SeasonDate(1, 1),
+              SeasonDate(1, 1),
+              Some(List(Proration(SeasonDate(1, 1), Price("2500000", "GBP"))))
+            ),
+            "P5D"
+          )
       }
     }
 
@@ -76,17 +87,18 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
       val ws = MockWS {
         case (
             GET,
-            "http://someMockUrl/somePackageName/inappproducts/skuCode"
+            "https://www.googleapis.com/androidpublisher/v3/applications/somePackageName/inappproducts/skuCode"
             ) =>
           Action {
             Ok(s"""{"packageName": "packageName"}""")
           }
       }
 
-      val googleHttpClient = new GoogleHTTPClient(ws, configuration)
+      val googleHttpClient = new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
-      whenReady(googleHttpClient.getSKU("skuCode"), timeout, interval) { result =>
-        result.left.get shouldBe a[GoogleHTTPClientDeserialisationException]
+      whenReady(googleHttpClient.getSKU("skuCode") failed, timeout, interval) {
+        result =>
+          result shouldBe an [GoogleHTTPClientDeserialisationException]
       }
     }
 
@@ -94,17 +106,17 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
       val ws = MockWS {
         case (
             GET,
-            "http://someMockUrl/somePackageName/inappproducts/skuCode"
+            "https://www.googleapis.com/androidpublisher/v3/applications/somePackageName/inappproducts/skuCode"
             ) =>
           Action {
             InternalServerError("Some Server Error")
           }
       }
 
-      val googleHttpClient = new GoogleHTTPClient(ws, configuration)
+      val googleHttpClient = new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
-      whenReady(googleHttpClient.getSKU("skuCode")) { result =>
-        result.left.get shouldBe GoogleHTTPClientException(
+      whenReady(googleHttpClient.getSKU("skuCode") failed) { result =>
+        result shouldBe GoogleHTTPClientException(
           INTERNAL_SERVER_ERROR,
           "Server error"
         )
@@ -117,8 +129,10 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
     val configuration = Configuration.from(
       Map(
         "google.packageName" -> "somePackageName",
-        "google.apiUrl" -> "http://someMockUrl",
-        "google.playDeveloperAccessToken" -> "someAccessToken"
+        "google.playDeveloperRefreshToken" -> "someRefreshToken",
+        "swg.clientId" -> "someClientId",
+        "swg.clientSecret" -> "someClientSecret",
+        "swg.redirectUri" -> "someRedirectUri",
       )
     )
 
@@ -128,9 +142,9 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
     "Retrieve and deserialise a subscription purchase" in {
       val ws = MockWS {
         case (
-          GET,
-          "http://someMockUrl/somePackageName/purchases/subscriptions/someProductId/tokens/somePurchaseToken"
-          ) =>
+            GET,
+            "https://www.googleapis.com/androidpublisher/v3/applications/somePackageName/purchases/subscriptions/someProductId/tokens/somePurchaseToken"
+            ) =>
           Action {
             Ok(s"""{
                   |"kind": "androidpublisher#subscriptionPurchase",
@@ -160,10 +174,15 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
           }
       }
 
-      val googleHttpClient = new GoogleHTTPClient(ws, configuration)
+      val googleHttpClient = new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
-      whenReady(googleHttpClient.getSubscriptionPurchase("someProductId", "somePurchaseToken"), timeout, interval) { result =>
-        result.right.get shouldBe SubscriptionPurchase(
+      whenReady(
+        googleHttpClient
+          .getSubscriptionPurchase("someProductId", "somePurchaseToken"),
+        timeout,
+        interval
+      ) { result =>
+        result shouldBe SubscriptionPurchase(
           "androidpublisher#subscriptionPurchase",
           1,
           1,
@@ -191,36 +210,44 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
     "Fail with invalid JSON" in {
       val ws = MockWS {
         case (
-          GET,
-          "http://someMockUrl/somePackageName/purchases/subscriptions/someProductId/tokens/somePurchaseToken"
-          ) =>
+            GET,
+            "https://www.googleapis.com/androidpublisher/v3/applications/somePackageName/purchases/subscriptions/someProductId/tokens/somePurchaseToken"
+            ) =>
           Action {
             Ok(s"""{"packageName": "packageName"}""")
           }
       }
 
-      val googleHttpClient = new GoogleHTTPClient(ws, configuration)
+      val googleHttpClient = new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
-      whenReady(googleHttpClient.getSubscriptionPurchase("someProductId", "somePurchaseToken"), timeout, interval) { result =>
-        result.left.get shouldBe a[GoogleHTTPClientDeserialisationException]
+      whenReady(
+        googleHttpClient
+          .getSubscriptionPurchase("someProductId", "somePurchaseToken") failed,
+        timeout,
+        interval
+      ) { result =>
+        result shouldBe a[GoogleHTTPClientDeserialisationException]
       }
     }
 
     "Fail if HTTP request fails" in {
       val ws = MockWS {
         case (
-          GET,
-          "http://someMockUrl/somePackageName/purchases/subscriptions/someProductId/tokens/somePurchaseToken"
-          ) =>
+            GET,
+            "https://www.googleapis.com/androidpublisher/v3/applications/somePackageName/purchases/subscriptions/someProductId/tokens/somePurchaseToken"
+            ) =>
           Action {
             InternalServerError("Some Server Error")
           }
       }
 
-      val subPurchaseLookup = new GoogleHTTPClient(ws, configuration)
+      val subPurchaseLookup = new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
-      whenReady(subPurchaseLookup.getSubscriptionPurchase("someProductId", "somePurchaseToken")) { result =>
-        result.left.get shouldBe GoogleHTTPClientException(
+      whenReady(
+        subPurchaseLookup
+          .getSubscriptionPurchase("someProductId", "somePurchaseToken") failed
+      ) { result =>
+        result shouldBe GoogleHTTPClientException(
           INTERNAL_SERVER_ERROR,
           "Server error"
         )
