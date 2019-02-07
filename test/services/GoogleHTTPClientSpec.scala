@@ -1,9 +1,6 @@
 package services
 
-import exceptions.{
-  GoogleHTTPClientDeserializationException,
-  GoogleHTTPClientException
-}
+import exceptions.{GoogleHTTPClientDeserializationException, GoogleHTTPClientException}
 import mockws.MockWS
 import model._
 import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
@@ -16,7 +13,8 @@ import play.api.test.Helpers._
 import utils.MockWSHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.{Duration => Dur}
+import scala.concurrent.{Await, Future}
 
 class GoogleHTTPClientSpec
     extends WordSpecLike
@@ -36,7 +34,7 @@ class GoogleHTTPClientSpec
   "SKUs" must {
 
     val configuration =
-      Configuration.from(Map("google.packageName" -> "somePackageName", ))
+      Configuration.from(Map("google.packageName" -> "somePackageName"))
 
     val timeout = Timeout(Span(500, Millis))
     val interval = Interval(Span(25, Millis))
@@ -65,11 +63,14 @@ class GoogleHTTPClientSpec
       val googleHttpClient =
         new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
+
+      println(Await.result(googleHttpClient.getSKU("skuCode"), Dur.Inf))
+      8
       whenReady(googleHttpClient.getSKU("skuCode"), timeout, interval) {
         result =>
           result shouldBe SKU(
             "packageName",
-            "skuCode",
+            SKUCode("skuCode"),
             "status",
             "subscription",
             Price("2500000", "GBP"),
