@@ -1,6 +1,9 @@
 package services
 
-import exceptions.{GoogleHTTPClientDeserialisationException, GoogleHTTPClientException}
+import exceptions.{
+  GoogleHTTPClientDeserializationException,
+  GoogleHTTPClientException
+}
 import mockws.MockWS
 import model._
 import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
@@ -22,18 +25,18 @@ class GoogleHTTPClientSpec
     with MockWSHelper {
 
   class MockAccessTokenClient extends AccessTokenClient {
-    def get() = Future.successful(GoogleAccessToken("someAccessToken", 1, "someScope", "someType"))
+    def get() =
+      Future.successful(
+        GoogleAccessToken("someAccessToken", 1, "someScope", "someType")
+      )
   }
 
   val mockAccessTokenClient = new MockAccessTokenClient()
 
   "SKUs" must {
 
-    val configuration = Configuration.from(
-      Map(
-        "google.packageName" -> "somePackageName",
-      )
-    )
+    val configuration =
+      Configuration.from(Map("google.packageName" -> "somePackageName", ))
 
     val timeout = Timeout(Span(500, Millis))
     val interval = Interval(Span(25, Millis))
@@ -59,7 +62,8 @@ class GoogleHTTPClientSpec
           }
       }
 
-      val googleHttpClient = new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
+      val googleHttpClient =
+        new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
       whenReady(googleHttpClient.getSKU("skuCode"), timeout, interval) {
         result =>
@@ -94,11 +98,12 @@ class GoogleHTTPClientSpec
           }
       }
 
-      val googleHttpClient = new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
+      val googleHttpClient =
+        new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
       whenReady(googleHttpClient.getSKU("skuCode") failed, timeout, interval) {
         result =>
-          result shouldBe an [GoogleHTTPClientDeserialisationException]
+          result shouldBe an[GoogleHTTPClientDeserializationException]
       }
     }
 
@@ -113,7 +118,8 @@ class GoogleHTTPClientSpec
           }
       }
 
-      val googleHttpClient = new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
+      val googleHttpClient =
+        new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
       whenReady(googleHttpClient.getSKU("skuCode") failed) { result =>
         result shouldBe GoogleHTTPClientException(
@@ -174,7 +180,8 @@ class GoogleHTTPClientSpec
           }
       }
 
-      val googleHttpClient = new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
+      val googleHttpClient =
+        new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
       whenReady(
         googleHttpClient
@@ -218,7 +225,8 @@ class GoogleHTTPClientSpec
           }
       }
 
-      val googleHttpClient = new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
+      val googleHttpClient =
+        new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
       whenReady(
         googleHttpClient
@@ -226,7 +234,7 @@ class GoogleHTTPClientSpec
         timeout,
         interval
       ) { result =>
-        result shouldBe a[GoogleHTTPClientDeserialisationException]
+        result shouldBe a[GoogleHTTPClientDeserializationException]
       }
     }
 
@@ -241,7 +249,8 @@ class GoogleHTTPClientSpec
           }
       }
 
-      val subPurchaseLookup = new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
+      val subPurchaseLookup =
+        new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
       whenReady(
         subPurchaseLookup
