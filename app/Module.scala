@@ -1,5 +1,5 @@
 import com.google.inject.AbstractModule
-import services.{AccessTokenClient, GoogleAccessTokenClient, GoogleHTTPClient, HTTPClient}
+import services._
 
 class Module extends AbstractModule {
   override def configure(): Unit = {
@@ -8,5 +8,8 @@ class Module extends AbstractModule {
 
     bind(classOf[AccessTokenClient])
       .to(classOf[GoogleAccessTokenClient])
-    }
+
+    bind(classOf[ConfigService])
+      .to(classOf[ProductService])
+  }
 }
