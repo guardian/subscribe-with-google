@@ -19,7 +19,7 @@ val enumeratumPlayJsonVersion = "1.5.15"
 
 libraryDependencies ++= Seq(
   guice,
-  "com.beachape" %% "enumeratum-play" % enumeratumPlayJsonVersion,
+  "com.beachape" %% "enumeratum-play-json" % enumeratumPlayJsonVersion,
   ws,
   caffeine,
   "com.github.blemale" %% "scaffeine" % "2.5.0" % "compile",

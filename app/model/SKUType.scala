@@ -1,8 +1,12 @@
 package model
 
-sealed trait SKUType {}
+import enumeratum._
 
-case object OneTimeContribution extends SKUType
+sealed trait SKUType extends EnumEntry
 
-case object RecurringContribution extends SKUType
+object SKUType extends Enum[SKUType] {
+  val values = findValues
 
+  case object Single extends SKUType
+  case object Recurring extends SKUType
+}
