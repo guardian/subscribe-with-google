@@ -1,6 +1,6 @@
 package model
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 
 case class SKUCode(sku: String)
 
@@ -29,7 +29,10 @@ case class SKU(packageName: String,
                trialPeriod: String)
 
 object SKUCode {
-  implicit val format = Json.format[SKUCode]
+  implicit val format = new Format[SKUCode] {
+    override def reads(json: JsValue): JsResult[SKUCode] = json.validate[String].map{str => SKUCode(str)}
+    override def writes(o: SKUCode): JsValue = JsString(o.sku)
+  }
 }
 
 object Price {
