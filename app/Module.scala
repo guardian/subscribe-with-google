@@ -8,8 +8,5 @@ class Module extends AbstractModule {
 
     bind(classOf[AccessTokenClient])
       .to(classOf[GoogleAccessTokenClient])
-
-    bind(classOf[ConfigService])
-      .to(classOf[ProductService])
   }
 }
