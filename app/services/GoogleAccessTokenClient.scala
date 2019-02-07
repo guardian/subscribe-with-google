@@ -46,9 +46,7 @@ class GoogleAccessTokenClient @Inject()(
         (_: String) => getAccessTokenRequest()
       )
 
-  def get(): Future[GoogleAccessToken] = {
-    cache.get("accessToken")
-  }
+  def get(): Future[GoogleAccessToken] = cache.get("accessToken")
 
   def getAccessTokenRequest(): Future[GoogleAccessToken] = {
     val params = Seq(

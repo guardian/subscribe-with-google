@@ -2,6 +2,8 @@ package model
 
 import play.api.libs.json.Json
 
+case class SKUCode(sku: String)
+
 case class Price(priceMicros: String, currency: String)
 
 case class Listing(title: String, description: String)
@@ -15,7 +17,7 @@ case class Season(start: SeasonDate,
                   prorations: Option[List[Proration]])
 
 case class SKU(packageName: String,
-               sku: String,
+               sku: SKUCode,
                status: String,
                purchaseType: String,
                defaultPrice: Price,
@@ -25,6 +27,10 @@ case class SKU(packageName: String,
                subscriptionPeriod: String,
                season: Season,
                trialPeriod: String)
+
+object SKUCode {
+  implicit val format = Json.format[SKUCode]
+}
 
 object Price {
   implicit val format = Json.format[Price]

@@ -15,7 +15,7 @@ scalaVersion := "2.12.8"
 
 scapegoatVersion in ThisBuild := "1.3.2"
 
-val enumeratumPlayJsonVersion = "1.5.14"
+val enumeratumPlayJsonVersion = "1.5.15"
 
 libraryDependencies ++= Seq(
   guice,
