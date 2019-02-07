@@ -1,7 +1,9 @@
 package services
 
 import exceptions.{
-  GoogleHTTPClientDeserializationException, GoogleHTTPClientException}
+  GoogleHTTPClientDeserializationException,
+  GoogleHTTPClientException
+}
 import javax.inject._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -14,9 +16,12 @@ import model.{SKU, SubscriptionPurchase}
 trait HTTPClient
 
 @Singleton
-class GoogleHTTPClient @Inject()(wsClient: WSClient, accessTokenClient: AccessTokenClient, config: Configuration)(
-  implicit executionContext: ExecutionContext
-) extends HTTPClient {
+class GoogleHTTPClient @Inject()(
+  wsClient: WSClient,
+  accessTokenClient: AccessTokenClient,
+  config: Configuration
+)(implicit executionContext: ExecutionContext)
+    extends HTTPClient {
   val apiBaseUrl = "https://www.googleapis.com/androidpublisher/v3/applications"
 
   val packageName = config.get[String]("google.packageName")
@@ -33,10 +38,8 @@ class GoogleHTTPClient @Inject()(wsClient: WSClient, accessTokenClient: AccessTo
       s"purchases/subscriptions/$productId/tokens/$purchaseToken"
     )
 
-  def getRequest[A: Reads](
-    wsClient: WSClient,
-    relativeUrl: String
-  ): Future[A] = {
+  def getRequest[A: Reads](wsClient: WSClient,
+                           relativeUrl: String): Future[A] = {
     val url = s"$apiBaseUrl/$packageName/$relativeUrl"
 
     accessTokenClient.get() flatMap { accessToken =>
@@ -44,11 +47,9 @@ class GoogleHTTPClient @Inject()(wsClient: WSClient, accessTokenClient: AccessTo
     }
   }
 
-  def getRequestWithAccessToken[A: Reads](
-    wsClient: WSClient,
-    url: String,
-    accessToken: String
-  ): Future[A] = {
+  def getRequestWithAccessToken[A: Reads](wsClient: WSClient,
+                                          url: String,
+                                          accessToken: String): Future[A] = {
     wsClient
       .url(url)
       .addHttpHeaders("Authorization" -> accessToken)
