@@ -1,6 +1,6 @@
 package services
 
-import exceptions.{DeserializationException, GoogleHTTPClientDeserializationException, GoogleHTTPClientException}
+import exceptions.{DeserializationException, GoogleHTTPClientException}
 import mockws.{MockWS, Route}
 import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
 import org.scalatest.concurrent.ScalaFutures
@@ -29,7 +29,7 @@ class GoogleAccessTokenClientSpec
       )
     )
 
-    val timeout = Timeout(Span(1000, Millis))
+    val timeout = Timeout(Span(2000, Millis))
     val interval = Interval(Span(25, Millis))
 
     "Retrieve and deserialise an Access Token" in {
