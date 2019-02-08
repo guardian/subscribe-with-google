@@ -6,7 +6,7 @@
 GET     /                           controllers.StatusController.index
 
 
-GET     /oauth/:count               controllers.OAuthController.oauth(count: Int)
+GET     /oauth                      controllers.OAuthController.oauth
 GET     /login                      controllers.LoginController.login
 
 
