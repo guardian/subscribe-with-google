@@ -1,6 +1,7 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
+import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
 
 @Singleton
@@ -8,11 +9,7 @@ class OAuthController @Inject()(cc: ControllerComponents) extends AbstractContro
 
   private val MaxViews = 4
 
-  def oauth(count: Int = 0) = Action { implicit request: Request[AnyContent] =>
-    Ok("{}")
+  def oauth() = Action { implicit request: Request[AnyContent] =>
+    Ok(Json.toJson("{}"))
   }
-
-
-
-
 }
