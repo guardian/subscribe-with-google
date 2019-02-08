@@ -1,9 +1,6 @@
 package services
 
-import exceptions.{
-  GoogleHTTPClientDeserializationException,
-  GoogleHTTPClientException
-}
+import exceptions.{GoogleHTTPClientDeserializationException, GoogleHTTPClientException}
 import javax.inject._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -11,7 +8,7 @@ import play.api.Configuration
 import play.api.libs.json._
 import play.api.libs.ws._
 import play.api.http.Status
-import model.{SKU, SubscriptionPurchase}
+import model.{SKU, SKUCode, SubscriptionPurchase}
 
 trait HTTPClient
 
@@ -26,16 +23,16 @@ class GoogleHTTPClient @Inject()(
 
   val packageName = config.get[String]("google.packageName")
 
-  def getSKU(sku: String): Future[SKU] =
-    getRequest[SKU](wsClient, s"inappproducts/$sku")
+  def getSKU(sku: SKUCode): Future[SKU] =
+    getRequest[SKU](wsClient, s"inappproducts/${sku.sku}")
 
   def getSubscriptionPurchase(
-    productId: String,
+    sku: SKUCode,
     purchaseToken: String
   ): Future[SubscriptionPurchase] =
     getRequest[SubscriptionPurchase](
       wsClient,
-      s"purchases/subscriptions/$productId/tokens/$purchaseToken"
+      s"purchases/subscriptions/${sku.sku}/tokens/$purchaseToken"
     )
 
   def getRequest[A: Reads](wsClient: WSClient,
