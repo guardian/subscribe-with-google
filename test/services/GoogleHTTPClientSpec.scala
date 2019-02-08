@@ -13,8 +13,7 @@ import play.api.test.Helpers._
 import utils.MockWSHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.{Duration => Dur}
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 class GoogleHTTPClientSpec
     extends WordSpecLike
@@ -63,10 +62,7 @@ class GoogleHTTPClientSpec
       val googleHttpClient =
         new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
-
-      println(Await.result(googleHttpClient.getSKU("skuCode"), Dur.Inf))
-      8
-      whenReady(googleHttpClient.getSKU("skuCode"), timeout, interval) {
+      whenReady(googleHttpClient.getSKU(SKUCode("skuCode")), timeout, interval) {
         result =>
           result shouldBe SKU(
             "packageName",
@@ -102,7 +98,7 @@ class GoogleHTTPClientSpec
       val googleHttpClient =
         new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
-      whenReady(googleHttpClient.getSKU("skuCode") failed, timeout, interval) {
+      whenReady(googleHttpClient.getSKU(SKUCode("skuCode")) failed, timeout, interval) {
         result =>
           result shouldBe an[GoogleHTTPClientDeserializationException]
       }
@@ -122,7 +118,7 @@ class GoogleHTTPClientSpec
       val googleHttpClient =
         new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
-      whenReady(googleHttpClient.getSKU("skuCode") failed) { result =>
+      whenReady(googleHttpClient.getSKU(SKUCode("skuCode")) failed) { result =>
         result shouldBe GoogleHTTPClientException(
           INTERNAL_SERVER_ERROR,
           "Server error"
@@ -186,7 +182,7 @@ class GoogleHTTPClientSpec
 
       whenReady(
         googleHttpClient
-          .getSubscriptionPurchase("someProductId", "somePurchaseToken"),
+          .getSubscriptionPurchase(SKUCode("someProductId"), "somePurchaseToken"),
         timeout,
         interval
       ) { result =>
@@ -231,7 +227,7 @@ class GoogleHTTPClientSpec
 
       whenReady(
         googleHttpClient
-          .getSubscriptionPurchase("someProductId", "somePurchaseToken") failed,
+          .getSubscriptionPurchase(SKUCode("someProductId"), "somePurchaseToken") failed,
         timeout,
         interval
       ) { result =>
@@ -255,7 +251,7 @@ class GoogleHTTPClientSpec
 
       whenReady(
         subPurchaseLookup
-          .getSubscriptionPurchase("someProductId", "somePurchaseToken") failed
+          .getSubscriptionPurchase(SKUCode("someProductId"), "somePurchaseToken") failed
       ) { result =>
         result shouldBe GoogleHTTPClientException(
           INTERNAL_SERVER_ERROR,
