@@ -15,8 +15,8 @@ Feature: Contribute with Google
   Scenario: Existing user contribution
     Given I have a Guardian account
     When I make a contribution
-    Then I the contribution should be associated with my account
+    Then the contribution should be associated with my account
 
   Scenario: Ophan analytics
     When I make a contribution
-    Then I contribution should be recorded in Ophan analytics
+    Then the contribution should be recorded in Ophan analytics
