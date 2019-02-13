@@ -20,3 +20,16 @@ Feature: Contribute with Google
   Scenario: Ophan analytics
     When I make a contribution
     Then the contribution should be recorded in Ophan analytics
+
+  Scenario: Tracking a contribution
+     When I make a contribution
+     Then the contribution should be found in the database
+     
+  Scenario: Seeing my entitlements
+     When I have made a contribution
+     Then I can see my entitlements (Guardian subscription) in Google News
+     
+  Scenario: Email comms from the Play store
+     When I have made a contribution
+     Then I should receive an email from the Play Store
+     
