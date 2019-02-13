@@ -1,7 +1,9 @@
-Feature Contribute with Google
+Feature: Contribute with Google
+  In order to make a quick, frictionless contribution to The Guardian
+  As a Guardian reader
+  I want to make a contribution with Contribute with Google
 
   Scenario: Contribution thank you e-mail
-    Given I am on an AMP article page
     When I make a contribution
     Then I should receive a thank you e-mail
 
