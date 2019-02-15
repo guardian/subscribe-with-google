@@ -93,21 +93,21 @@ Resources:
                 Action: ssm:GetParametersByPath
                 Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${App}/${Stage}
         - PolicyName: DescribeTags
-            PolicyDocument:
-              Version: 2012-10-17
-              Statement:
-                - Effect: Allow
-                  Action: ec2:DescribeTags
-                  Resource: "*"
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: ec2:DescribeTags
+                Resource: "*"
         - PolicyName: DescribeAutoScaling
-            PolicyDocument:
-              Version: 2012-10-17
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - autoscaling:DescribeAutoScalingInstances
-                    - autoscaling:DescribeAutoScalingGroups
-                  Resource: "*"
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - autoscaling:DescribeAutoScalingInstances
+                  - autoscaling:DescribeAutoScalingGroups
+                Resource: "*"
 
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
