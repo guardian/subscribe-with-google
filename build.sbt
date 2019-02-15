@@ -51,3 +51,7 @@ scapegoatDisabledInspections := Seq("FinalModifierOnCaseClass")
 javaOptions in Universal ++= Seq(
   "-Dhttp.port=9233",
 )
+
+javaOptions in Test ++= Seq(
+  "-Dconfig.file=conf/application.dev.conf"
+)
