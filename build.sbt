@@ -25,9 +25,9 @@ libraryDependencies ++= Seq(
   ws,
   caffeine,
   "com.github.blemale" %% "scaffeine" % "2.5.0" % "compile",
+  "com.gu" %% "simple-configuration-ssm" % "1.4.1",
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
-  "de.leanovate.play-mockws" %% "play-mockws" % "2.6.2" % Test,
-  "com.gu" %% "simple-configuration-ssm" % "1.4.1"
+  "de.leanovate.play-mockws" %% "play-mockws" % "2.7.0" % Test
 )
 
 topLevelDirectory in Universal := None
