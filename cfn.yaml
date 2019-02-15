@@ -31,14 +31,6 @@ Parameters:
   CertificateARN:
     Description: SSL Certificate
     Type: String
-  APP_SECRET:
-    Type: String
-  SWG_CLIENT_ID:
-    Type: String
-  SWG_CLIENT_SECRET:
-    Type: String
-  GOOGLE_PLAY_DEVELOPER_REFRESH_TOKEN:
-    Type: String
 Resources:
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -98,6 +90,14 @@ Resources:
                 - ec2.amazonaws.com
             Action:
               - sts:AssumeRole
+      Policies:
+        - PolicyName: ConfigLoad
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: ssm:GetParametersByPath
+                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${App}/${Stage}
 
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
