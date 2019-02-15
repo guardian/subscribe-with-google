@@ -54,12 +54,6 @@ Resources:
         - Key: Stage
           Value: !Ref Stage
           PropagateAtLaunch: true
-      Environment:
-        Variables:
-          APP_SECRET: { Ref: "APP_SECRET" }
-          SWG_CLIENT_ID: { Ref: "SWG_CLIENT_ID" }
-          SWG_CLIENT_SECRET: { Ref: "SWG_CLIENT_SECRET" }
-          GOOGLE_PLAY_DEVELOPER_REFRESH_TOKEN: { Ref: "GOOGLE_PLAY_DEVELOPER_REFRESH_TOKEN" }
   LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
