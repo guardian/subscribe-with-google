@@ -27,7 +27,7 @@ class PaymentHTTPClientSpec extends WordSpecLike
       val ws = MockWS {
         case (
           POST,
-          "paymentUrl"
+          "paymentUrl/contribute/one-off/swg/record-payment"
           ) =>
           Action {
             Ok("{}".stripMargin)
@@ -44,7 +44,7 @@ class PaymentHTTPClientSpec extends WordSpecLike
       val ws = MockWS {
         case (
           POST,
-          "paymentUrl"
+          "paymentUrl/contribute/one-off/swg/record-payment"
           ) =>
           Action {
             InternalServerError("Some Server Error")
@@ -53,6 +53,50 @@ class PaymentHTTPClientSpec extends WordSpecLike
       val client = new PaymentHTTPClient(ws, configuration)
       val paymentRecord = PaymentRecord("firstName", "e-mail", PaymentStatus.Paid, 1.00, "GBP", "UK", "123", 1234)
       whenReady(client.createPaymentRecord(paymentRecord) failed, timeout, interval) {
+        result => result shouldBe PaymentClientException(
+          INTERNAL_SERVER_ERROR,
+          "Server error"
+        )
+      }
+    }
+  }
+
+  "Refund payment" must {
+    val configuration =
+      Configuration.from(Map("guardian.paymentApiBaseUrl" -> "paymentUrl"))
+
+    val timeout = Timeout(Span(500, Millis))
+    val interval = Interval(Span(25, Millis))
+    "success" in {
+      val ws = MockWS {
+        case (
+          POST,
+          "paymentUrl/contribute/one-off/swg/refund-payment"
+          ) =>
+          Action {
+            Ok("{}".stripMargin)
+          }
+      }
+      val client = new PaymentHTTPClient(ws, configuration)
+      val paymentRecord = PaymentRecord("firstName", "e-mail", PaymentStatus.Paid, 1.00, "GBP", "UK", "123", 1234)
+      whenReady(client.refundPaymentRecord(paymentRecord), timeout, interval) {
+        _ => succeed
+      }
+    }
+
+    "server error" in {
+      val ws = MockWS {
+        case (
+          POST,
+          "paymentUrl/contribute/one-off/swg/refund-payment"
+          ) =>
+          Action {
+            InternalServerError("Some Server Error")
+          }
+      }
+      val client = new PaymentHTTPClient(ws, configuration)
+      val paymentRecord = PaymentRecord("firstName", "e-mail", PaymentStatus.Paid, 1.00, "GBP", "UK", "123", 1234)
+      whenReady(client.refundPaymentRecord(paymentRecord) failed, timeout, interval) {
         result => result shouldBe PaymentClientException(
           INTERNAL_SERVER_ERROR,
           "Server error"
