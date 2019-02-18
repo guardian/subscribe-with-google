@@ -1,7 +1,6 @@
 package model
 import play.api.libs.json.Json
 
-
 case class PaymentRecord(firstName: String,
                          email: String,
                          status: PaymentStatus,
