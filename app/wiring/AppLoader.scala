@@ -18,7 +18,6 @@ class AppLoader extends GuiceApplicationLoader {
     }
     val builder: GuiceApplicationBuilder = initialBuilder.in(context.environment).overrides(overrides(context): _*)
     val configuration: Configuration = context.initialConfiguration
-    print(loadedConfig)
-    builder.loadConfig(Configuration(loadedConfig) ++ configuration)
+    builder.loadConfig(configuration ++ Configuration(loadedConfig))
   }
 }
