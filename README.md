@@ -16,13 +16,6 @@ Local: `http://localhost:9233/healthcheck`
 
 Prod: `https://swg.theguardian.com/healthcheck`
 
-The following env vars must be set on the environment in which the app is running:
-
-* `APP_SECRET` - Used by Play for signing/encryption
-* `SWG_CLIENT_ID` - Google credentials for our SwG app
-* `SWG_CLIENT_SECRET`
-* `GOOGLE_PLAY_DEVELOPER_REFRESH_TOKEN` - Used to obtain access tokens to auth with Google APIs - [see here for more info](https://developers.google.com/android-publisher/authorization)
-
 The application has a POST endpoint that receives JSON from the Google Cloud PubSub queue.
 
 This can be tested by : `TODO: curl command with some sample json`

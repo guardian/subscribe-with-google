@@ -31,14 +31,6 @@ Parameters:
   CertificateARN:
     Description: SSL Certificate
     Type: String
-  APP_SECRET:
-    Type: String
-  SWG_CLIENT_ID:
-    Type: String
-  SWG_CLIENT_SECRET:
-    Type: String
-  GOOGLE_PLAY_DEVELOPER_REFRESH_TOKEN:
-    Type: String
 Resources:
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -62,12 +54,6 @@ Resources:
         - Key: Stage
           Value: !Ref Stage
           PropagateAtLaunch: true
-      Environment:
-        Variables:
-          APP_SECRET: { Ref: "APP_SECRET" }
-          SWG_CLIENT_ID: { Ref: "SWG_CLIENT_ID" }
-          SWG_CLIENT_SECRET: { Ref: "SWG_CLIENT_SECRET" }
-          GOOGLE_PLAY_DEVELOPER_REFRESH_TOKEN: { Ref: "GOOGLE_PLAY_DEVELOPER_REFRESH_TOKEN" }
   LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -98,6 +84,30 @@ Resources:
                 - ec2.amazonaws.com
             Action:
               - sts:AssumeRole
+      Policies:
+        - PolicyName: ConfigLoad
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: ssm:GetParametersByPath
+                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${App}/${Stage}
+        - PolicyName: DescribeTags
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: ec2:DescribeTags
+                Resource: "*"
+        - PolicyName: DescribeAutoScaling
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - autoscaling:DescribeAutoScalingInstances
+                  - autoscaling:DescribeAutoScalingGroups
+                Resource: "*"
 
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile

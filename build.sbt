@@ -17,14 +17,17 @@ scapegoatVersion in ThisBuild := "1.3.2"
 
 val enumeratumPlayJsonVersion = "1.5.15"
 
+resolvers += "Guardian Platform Bintray" at "https://dl.bintray.com/guardian/platforms"
+
 libraryDependencies ++= Seq(
   guice,
   "com.beachape" %% "enumeratum-play-json" % enumeratumPlayJsonVersion,
   ws,
   caffeine,
   "com.github.blemale" %% "scaffeine" % "2.5.0" % "compile",
+  "com.gu" %% "simple-configuration-ssm" % "1.4.1",
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
-  "de.leanovate.play-mockws" %% "play-mockws" % "2.6.2" % Test
+  "de.leanovate.play-mockws" %% "play-mockws" % "2.7.0" % Test
 )
 
 topLevelDirectory in Universal := None
@@ -49,4 +52,6 @@ javaOptions in Universal ++= Seq(
   "-Dhttp.port=9233",
 )
 
-javaOptions in Test += s"-Dconfig.file=conf/application.test.conf"
+javaOptions in Test ++= Seq(
+  "-Dconfig.file=conf/application.dev.conf"
+)
