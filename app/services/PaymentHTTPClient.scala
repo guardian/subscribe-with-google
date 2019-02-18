@@ -22,7 +22,7 @@ class PaymentHTTPClient @Inject()(
 
   def createPaymentRecord(paymentRecord: PaymentRecord): Future[Unit] =
     wsClient
-      .url(s"""$swgBaseUrl/record-payment""")
+      .url(s"$swgBaseUrl/record-payment")
       .post(Json.stringify(Json.toJson(paymentRecord))) map { response =>
     {
       if (response.status != Status.OK) {
@@ -33,7 +33,7 @@ class PaymentHTTPClient @Inject()(
 
   def refundPaymentRecord(paymentRecord: PaymentRecord): Future[Unit] =
     wsClient
-      .url(s"""$swgBaseUrl/refund-payment""")
+      .url(s"$swgBaseUrl/refund-payment")
       .post(Json.stringify(Json.toJson(paymentRecord))) map { response =>
     {
       if (response.status != Status.OK) {
