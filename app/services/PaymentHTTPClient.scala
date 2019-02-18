@@ -10,34 +10,23 @@ import play.api.libs.ws._
 import play.api.http.Status
 import model.PaymentRecord
 
-trait HTTPClient
 
 @Singleton
-class PaymentClient @Inject()(
+class PaymentHTTPClient @Inject()(
   wsClient: WSClient,
   config: Configuration
 )(implicit executionContext: ExecutionContext)
     extends HTTPClient {
   val apiBaseUrl = config.get[String]("guardian.paymentApiBaseUrl")
 
-  def createPaymentRecord(payload: JsValue): Future[PaymentRecord] =
+  def createPaymentRecord(paymentRecord: PaymentRecord): Future[Unit] =
     wsClient
-      .url(s"$apiBaseUrl/swg/payment")
-      .post(payload) map { response =>
+      .url(apiBaseUrl)
+      .post(Json.stringify(Json.toJson(paymentRecord))) map { response =>
     {
       if (response.status != Status.OK) {
         throw PaymentClientException(response.status, "Server error")
-      } else {
-        Json.parse(response.body).validate[PaymentRecord].asEither match {
-          case Left(l) =>
-            throw DeserializationException(
-              "Error deserialising JSON",
-              l
-            )
-          case Right(r) => r
-        }
       }
-    }
     }
   }
 }

@@ -10,8 +10,6 @@ import play.api.libs.ws._
 import play.api.http.Status
 import model.{SKU, SKUCode, SubscriptionPurchase}
 
-trait HTTPClient
-
 @Singleton
 class GoogleHTTPClient @Inject()(
   wsClient: WSClient,
