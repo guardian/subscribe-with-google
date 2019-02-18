@@ -18,10 +18,11 @@ class PaymentHTTPClient @Inject()(
 )(implicit executionContext: ExecutionContext)
     extends HTTPClient {
   val apiBaseUrl = config.get[String]("guardian.paymentApiBaseUrl")
+  val swgBaseUrl = s"""$apiBaseUrl/contribute/one-off/swg"""
 
   def createPaymentRecord(paymentRecord: PaymentRecord): Future[Unit] =
     wsClient
-      .url(apiBaseUrl)
+      .url(s"$swgBaseUrl/record-payment")
       .post(Json.stringify(Json.toJson(paymentRecord))) map { response =>
     {
       if (response.status != Status.OK) {
@@ -29,4 +30,15 @@ class PaymentHTTPClient @Inject()(
       }
     }
   }
+
+  def refundPaymentRecord(paymentRecord: PaymentRecord): Future[Unit] =
+    wsClient
+      .url(s"$swgBaseUrl/refund-payment")
+      .post(Json.stringify(Json.toJson(paymentRecord))) map { response =>
+    {
+      if (response.status != Status.OK) {
+        throw PaymentClientException(response.status, "Server error")
+      }
+    }
+    }
 }
