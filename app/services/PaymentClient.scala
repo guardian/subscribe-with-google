@@ -10,8 +10,6 @@ import play.api.libs.ws._
 import play.api.http.Status
 import model.PaymentRecord
 
-trait HTTPClient
-
 @Singleton
 class PaymentClient @Inject()(
   wsClient: WSClient,
@@ -37,7 +35,6 @@ class PaymentClient @Inject()(
           case Right(r) => r
         }
       }
-    }
     }
   }
 }

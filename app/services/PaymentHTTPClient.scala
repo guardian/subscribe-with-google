@@ -1,6 +1,6 @@
 package services
 
-import exceptions.{DeserializationException, PaymentClientException}
+import exceptions.PaymentClientException
 import javax.inject._
 
 import scala.concurrent.{ExecutionContext, Future}
