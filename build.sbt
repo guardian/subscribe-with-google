@@ -16,6 +16,7 @@ scalaVersion := "2.12.8"
 scapegoatVersion in ThisBuild := "1.3.2"
 
 val enumeratumPlayJsonVersion = "1.5.15"
+val AWSJavaSDKVersion = "1.11.501"
 
 resolvers += "Guardian Platform Bintray" at "https://dl.bintray.com/guardian/platforms"
 
@@ -25,8 +26,10 @@ libraryDependencies ++= Seq(
   ws,
   caffeine,
   "com.github.blemale" %% "scaffeine" % "2.5.0" % "compile",
+  "com.amazonaws" % "aws-java-sdk-cloudwatch" % AWSJavaSDKVersion,
   "com.gu" %% "simple-configuration-ssm" % "1.4.1",
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
+  "org.mockito" % "mockito-all" % "1.10.19" % "test",
   "de.leanovate.play-mockws" %% "play-mockws" % "2.7.0" % Test
 )
 
