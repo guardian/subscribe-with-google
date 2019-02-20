@@ -1,10 +1,10 @@
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.google.inject.AbstractModule
 import com.gu.{AppIdentity, AwsIdentity}
-import play.api.Configuration
+import play.api.{Configuration, Environment}
 import services._
 
-class Module(configuration: Configuration) extends AbstractModule {
+class Module(env: Environment, configuration: Configuration) extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[HTTPClient])
       .to(classOf[GoogleHTTPClient])
