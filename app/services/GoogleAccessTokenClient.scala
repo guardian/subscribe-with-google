@@ -18,8 +18,8 @@ trait AccessTokenClient {
 
 @Singleton
 class GoogleAccessTokenClient @Inject()(
-  wsClient: WSClient,
-  config: Configuration
+    wsClient: WSClient,
+    config: Configuration
 )(implicit executionContext: ExecutionContext)
     extends AccessTokenClient {
   val apiTokenUrl = "https://accounts.google.com/o/oauth2/token"
@@ -34,13 +34,9 @@ class GoogleAccessTokenClient @Inject()(
       .recordStats()
       .maximumSize(1)
       .expireAfter(
-        create = (_: String, accessToken: GoogleAccessToken) =>
-          accessToken.expiresIn seconds,
-        update =
-          (_: String, _: GoogleAccessToken, currentDuration: Duration) =>
-            currentDuration,
-        read = (_: String, _: GoogleAccessToken, currentDuration: Duration) =>
-          currentDuration
+        create = (_: String, accessToken: GoogleAccessToken) => accessToken.expiresIn seconds,
+        update = (_: String, _: GoogleAccessToken, currentDuration: Duration) => currentDuration,
+        read = (_: String, _: GoogleAccessToken, currentDuration: Duration) => currentDuration
       )
       .buildAsyncFuture[String, GoogleAccessToken](
         (_: String) => getAccessTokenRequest()

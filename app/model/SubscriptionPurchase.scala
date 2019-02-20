@@ -2,8 +2,7 @@ package model
 
 import play.api.libs.json.Json
 
-case class CancelSurveyResult(cancelSurveyReason: Double,
-                              userInputCancelReason: String)
+case class CancelSurveyResult(cancelSurveyReason: Double, userInputCancelReason: String)
 
 case class SubscriptionPurchase(kind: String,
                                 startTimeMillis: Long,

@@ -12,9 +12,7 @@ case class SeasonDate(month: Int, day: Int)
 
 case class Proration(start: SeasonDate, defaultPrice: Price)
 
-case class Season(start: SeasonDate,
-                  end: SeasonDate,
-                  prorations: Option[List[Proration]])
+case class Season(start: SeasonDate, end: SeasonDate, prorations: Option[List[Proration]])
 
 case class SKU(packageName: String,
                sku: SKUCode,
@@ -30,7 +28,9 @@ case class SKU(packageName: String,
 
 object SKUCode {
   implicit val format = new Format[SKUCode] {
-    override def reads(json: JsValue): JsResult[SKUCode] = json.validate[String].map{str => SKUCode(str)}
+    override def reads(json: JsValue): JsResult[SKUCode] = json.validate[String].map { str =>
+      SKUCode(str)
+    }
     override def writes(o: SKUCode): JsValue = JsString(o.sku)
   }
 }

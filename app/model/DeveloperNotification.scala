@@ -9,20 +9,17 @@ sealed trait DeveloperNotification {
   val eventTimeMillis: Long
 }
 
-
 case class SubscriptionDeveloperNotification(version: String,
                                              packageName: String,
                                              eventTimeMillis: Long,
-                                             subscriptionNotification: SubscriptionNotification
-                                ) extends DeveloperNotification
-
+                                             subscriptionNotification: SubscriptionNotification)
+    extends DeveloperNotification
 
 case class TestDeveloperNotification(version: String,
                                      packageName: String,
                                      eventTimeMillis: Long,
-                                     testNotification: TestNotification
-                            ) extends DeveloperNotification
-
+                                     testNotification: TestNotification)
+    extends DeveloperNotification
 
 object DeveloperNotification {
 
@@ -30,39 +27,40 @@ object DeveloperNotification {
     ((__ \ "version").read[String] and
       (__ \ "packageName").read[String] and
       (__ \ "eventTimeMillis").read[String].map[Long](_.toLong) and
-      (__ \ "subscriptionNotification").read[SubscriptionNotification]) (SubscriptionDeveloperNotification.apply _)
+      (__ \ "subscriptionNotification").read[SubscriptionNotification])(SubscriptionDeveloperNotification.apply _)
   }.reads(json)
 
   implicit val readTestSubscriptionEvent: Reads[TestDeveloperNotification] = (json: JsValue) => {
     ((__ \ "version").read[String] and
       (__ \ "packageName").read[String] and
       (__ \ "eventTimeMillis").read[String].map[Long](_.toLong) and
-      (__ \ "testNotification").read[TestNotification]) (TestDeveloperNotification.apply _)
+      (__ \ "testNotification").read[TestNotification])(TestDeveloperNotification.apply _)
   }.reads(json)
 
-  implicit val writeSubscriptionEvent: Writes[SubscriptionDeveloperNotification] = new Writes[SubscriptionDeveloperNotification] {
-    override def writes(o: SubscriptionDeveloperNotification): JsValue = {
-      Json.obj("version" -> o.version,
-        "packageName" -> o.packageName,
-        "eventTimeMillis" -> o.eventTimeMillis.toString,
-        "subscriptionNotification" -> Json.toJson(o.subscriptionNotification)
-      )
+  implicit val writeSubscriptionEvent: Writes[SubscriptionDeveloperNotification] =
+    new Writes[SubscriptionDeveloperNotification] {
+      override def writes(o: SubscriptionDeveloperNotification): JsValue = {
+        Json.obj(
+          "version" -> o.version,
+          "packageName" -> o.packageName,
+          "eventTimeMillis" -> o.eventTimeMillis.toString,
+          "subscriptionNotification" -> Json.toJson(o.subscriptionNotification)
+        )
+      }
     }
-  }
 
   implicit val writeTestEvent: Writes[TestDeveloperNotification] = (o: TestDeveloperNotification) => {
     Json.obj("version" -> o.version,
-      "packageName" -> o.packageName,
-      "eventTimeMillis" -> o.eventTimeMillis.toString,
-      "testNotification" -> Json.toJson(o.testNotification)
-    )
+             "packageName" -> o.packageName,
+             "eventTimeMillis" -> o.eventTimeMillis.toString,
+             "testNotification" -> Json.toJson(o.testNotification))
   }
 
   implicit val writes: Writes[DeveloperNotification] = new Writes[DeveloperNotification] {
     override def writes(o: DeveloperNotification): JsValue = {
       o match {
         case sub: SubscriptionDeveloperNotification => Json.toJson[SubscriptionDeveloperNotification](sub)
-        case test: TestDeveloperNotification => Json.toJson[TestDeveloperNotification](test)
+        case test: TestDeveloperNotification        => Json.toJson[TestDeveloperNotification](test)
       }
     }
   }
