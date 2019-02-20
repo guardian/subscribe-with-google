@@ -15,7 +15,7 @@ scalaVersion := "2.12.8"
 
 scapegoatVersion in ThisBuild := "1.3.2"
 
-val enumeratumPlayJsonVersion = "1.5.15"
+val enumeratumPlayJsonVersion = "1.5.16"
 val AWSJavaSDKVersion = "1.11.501"
 
 resolvers += "Guardian Platform Bintray" at "https://dl.bintray.com/guardian/platforms"
