@@ -27,7 +27,7 @@ class Module(env: Environment, configuration: Configuration) extends AbstractMod
   private def getEnvironmentStage(appName: String): String = {
     AppIdentity.whoAmI(appName) match {
       case AwsIdentity(_, _, stage, _) => stage
-      case _ => "DEV"
+      case _                           => "DEV"
     }
   }
 }
