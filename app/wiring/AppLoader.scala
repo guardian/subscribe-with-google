@@ -7,7 +7,6 @@ import com.typesafe.config.Config
 import play.api.Configuration
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceApplicationLoader}
 
-
 class AppLoader extends GuiceApplicationLoader {
 
   override protected def builder(context: Context): GuiceApplicationBuilder = {
@@ -16,7 +15,7 @@ class AppLoader extends GuiceApplicationLoader {
 
     val loadedConfig: Config = ConfigurationLoader.load(identity) {
       case AwsIdentity(app, stack, stage, _) => SSMConfigurationLocation(s"/$app/$stage")
-      case DevIdentity(app) => ResourceConfigurationLocation("application.dev.conf")
+      case DevIdentity(app)                  => ResourceConfigurationLocation("application.dev.conf")
     }
 
     val builder: GuiceApplicationBuilder = initialBuilder.in(context.environment).overrides(overrides(context): _*)

@@ -1,6 +1,6 @@
 package model
 
-import enumeratum.{ PlayJsonEnum, Enum, EnumEntry }
+import enumeratum.{PlayJsonEnum, Enum, EnumEntry}
 
 sealed trait PaymentStatus extends EnumEntry
 

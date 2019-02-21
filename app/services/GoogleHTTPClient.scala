@@ -12,9 +12,9 @@ import model.{SKU, SKUCode, SubscriptionPurchase}
 
 @Singleton
 class GoogleHTTPClient @Inject()(
-  wsClient: WSClient,
-  accessTokenClient: AccessTokenClient,
-  config: Configuration
+    wsClient: WSClient,
+    accessTokenClient: AccessTokenClient,
+    config: Configuration
 )(implicit executionContext: ExecutionContext)
     extends HTTPClient {
   val apiBaseUrl = "https://www.googleapis.com/androidpublisher/v3/applications"
@@ -25,16 +25,15 @@ class GoogleHTTPClient @Inject()(
     getRequest[SKU](wsClient, s"inappproducts/${sku.sku}")
 
   def getSubscriptionPurchase(
-    sku: SKUCode,
-    purchaseToken: String
+      sku: SKUCode,
+      purchaseToken: String
   ): Future[SubscriptionPurchase] =
     getRequest[SubscriptionPurchase](
       wsClient,
       s"purchases/subscriptions/${sku.sku}/tokens/$purchaseToken"
     )
 
-  def getRequest[A: Reads](wsClient: WSClient,
-                           relativeUrl: String): Future[A] = {
+  def getRequest[A: Reads](wsClient: WSClient, relativeUrl: String): Future[A] = {
     val url = s"$apiBaseUrl/$packageName/$relativeUrl"
 
     accessTokenClient.get() flatMap { accessToken =>
@@ -42,9 +41,7 @@ class GoogleHTTPClient @Inject()(
     }
   }
 
-  def getRequestWithAccessToken[A: Reads](wsClient: WSClient,
-                                          url: String,
-                                          accessToken: String): Future[A] = {
+  def getRequestWithAccessToken[A: Reads](wsClient: WSClient, url: String, accessToken: String): Future[A] = {
     wsClient
       .url(url)
       .addHttpHeaders("Authorization" -> accessToken)

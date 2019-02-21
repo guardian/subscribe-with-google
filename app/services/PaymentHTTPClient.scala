@@ -10,11 +10,10 @@ import play.api.libs.ws._
 import play.api.http.Status
 import model.PaymentRecord
 
-
 @Singleton
 class PaymentHTTPClient @Inject()(
-  wsClient: WSClient,
-  config: Configuration
+    wsClient: WSClient,
+    config: Configuration
 )(implicit executionContext: ExecutionContext)
     extends HTTPClient {
   val apiBaseUrl = config.get[String]("guardian.paymentApiBaseUrl")
@@ -24,21 +23,21 @@ class PaymentHTTPClient @Inject()(
     wsClient
       .url(s"$swgBaseUrl/record-payment")
       .post(Json.stringify(Json.toJson(paymentRecord))) map { response =>
-    {
-      if (response.status != Status.OK) {
-        throw PaymentClientException(response.status, "Server error")
+      {
+        if (response.status != Status.OK) {
+          throw PaymentClientException(response.status, "Server error")
+        }
       }
     }
-  }
 
   def refundPaymentRecord(paymentRecord: PaymentRecord): Future[Unit] =
     wsClient
       .url(s"$swgBaseUrl/refund-payment")
       .post(Json.stringify(Json.toJson(paymentRecord))) map { response =>
-    {
-      if (response.status != Status.OK) {
-        throw PaymentClientException(response.status, "Server error")
+      {
+        if (response.status != Status.OK) {
+          throw PaymentClientException(response.status, "Server error")
+        }
       }
-    }
     }
 }
