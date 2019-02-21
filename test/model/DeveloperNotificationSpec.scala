@@ -22,7 +22,27 @@ class DeveloperNotificationSpec extends WordSpecLike with Matchers {
 
       val jsValue = Json.parse("""{"version":"1.0","packageName":"com.guardian","eventTimeMillis":"1549369095263","subscriptionNotification":{"version":"1.0","notificationType":2,"purchaseToken":"","subscriptionId":"uk.co.guardian.subscription"}}""")
       Json.stringify(Json.toJson[DeveloperNotification](subscriptionDeveloperNotification)) shouldBe Json.stringify(jsValue)
+    }
 
+    "Fail to serialize a developer subscription notification with a non-enum notification type" in {
+
+      val subscriptionNotification = SubscriptionNotification("1.0",
+        NotificationType.SubscriptionRenewed,
+        "",
+        "uk.co.guardian.subscription")
+
+      val currentTime = System.currentTimeMillis()
+      val subscriptionDeveloperNotification: DeveloperNotification = SubscriptionDeveloperNotification(
+        "1.0",
+        "com.guardian",
+        1549369095263L,
+        subscriptionNotification)
+
+      val jsValue = Json.parse("""{"version":"1.0","packageName":"com.guardian","eventTimeMillis":"1549369095263","subscriptionNotification":{"version":"1.0","notificationType":1337,"purchaseToken":"","subscriptionId":"uk.co.guardian.subscription"}}""")
+
+      val notification = jsValue.validate[DeveloperNotification]
+
+      notification shouldBe a[JsError]
     }
 
     "Serialize a developer test notification" in {

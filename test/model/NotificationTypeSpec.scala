@@ -6,7 +6,7 @@ class NotificationTypeSpec extends WordSpecLike with Matchers {
 
   "NotificationType enum" must {
     "have 9 types" in {
-      NotificationType.values.size shouldBe 9
+      NotificationType.values.size shouldBe 11
     }
     "be creatable from Int" in {
       NotificationType.withValue(1) shouldBe NotificationType.SubscriptionRecovered
@@ -18,6 +18,8 @@ class NotificationTypeSpec extends WordSpecLike with Matchers {
       NotificationType.withValue(7) shouldBe NotificationType.SubscriptionRestarted
       NotificationType.withValue(8) shouldBe NotificationType.SubscriptionPriceChangeConfirmed
       NotificationType.withValue(9) shouldBe NotificationType.SubscriptionDeferred
+      NotificationType.withValue(12) shouldBe NotificationType.SubscriptionRevoked
+      NotificationType.withValue(13) shouldBe NotificationType.SubscriptionExpired
     }
   }
 }
