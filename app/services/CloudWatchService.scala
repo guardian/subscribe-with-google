@@ -5,15 +5,23 @@ import com.amazonaws.services.cloudwatch.model.{Dimension, MetricDatum, PutMetri
 import model.SKUType
 import play.api.Logger._
 
-trait MonitoringService
+trait MonitoringService {
+
+  def put(metricName: String, dimensionName: String, metricValue: String): Unit
+
+  def incrementSkuTypeCounter(metricName: String, skuType: SKUType): Unit
+
+  def incrementDeserializationFailure(reason: String): Unit
+
+}
 
 class CloudWatchService(cloudWatchAsyncClient: AmazonCloudWatchAsync, qualifier: String) extends MonitoringService {
   private val namespace = s"support-subscribe-with-google-$qualifier"
 
-  def put(metricName: String, skuType: SKUType): Unit = {
+  def put(metricName: String, dimensionName: String, metricValue: String): Unit = {
     val skuTypeDimension = new Dimension()
-      .withName("sku-type")
-      .withValue(skuType.toString)
+      .withName(dimensionName)
+      .withValue(metricValue)
 
     val metric = new MetricDatum()
       .withValue(1d)
@@ -27,6 +35,15 @@ class CloudWatchService(cloudWatchAsyncClient: AmazonCloudWatchAsync, qualifier:
 
     cloudWatchAsyncClient.putMetricDataAsync(request, CloudWatchService.LoggingAsyncHandler)
   }
+
+  def incrementSkuTypeCounter(metricName: String, skuType: SKUType): Unit = {
+    put(metricName, "sku-type", skuType.toString)
+  }
+
+  def incrementDeserializationFailure(reason: String): Unit = {
+    put("DeserializationFailure", "DeserializationFailure", reason)
+  }
+
 }
 
 object CloudWatchService {
