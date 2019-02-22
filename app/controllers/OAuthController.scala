@@ -7,8 +7,6 @@ import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Reque
 @Singleton
 class OAuthController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
-  private val MaxViews = 4
-
   def oauth() = Action { implicit request: Request[AnyContent] =>
     Ok(Json.toJson("{}"))
   }
