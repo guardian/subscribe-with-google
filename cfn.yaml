@@ -31,6 +31,7 @@ Parameters:
   CertificateARN:
     Description: SSL Certificate
     Type: String
+
 Resources:
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -54,6 +55,7 @@ Resources:
         - Key: Stage
           Value: !Ref Stage
           PropagateAtLaunch: true
+
   LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -70,6 +72,7 @@ Resources:
             export INSTANCE_ID=$(hostname -i)
             dpkg -i /tmp/${App}_1.0_all.deb
             subscribe-with-google
+
   AppRole:
     Type: AWS::IAM::Role
     Properties:
@@ -201,3 +204,63 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
+
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "google-pub-sub-${Stage}"
+
+  SQSRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: api-gateway-google-pub-sub-sqs-access-role
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: api-gateway-google-pub-sub-sqs-access-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action: sqs:SendMessage
+                Effect: Allow
+                Resource: !GetAtt SQSQueue.Arn
+
+  MessageApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub "google-pub-sub-api-${Stage}"
+      Description: Receives notifications from Google Pub Sub. Currently used by Subscribe with Google.
+
+  MessageResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      PathPart: "message"
+      RestApiId: !Ref "MessageApi"
+      ParentId: !GetAtt MessageApi.RootResourceId
+
+  ReceiveMessageMethod:
+    Type: AWS::ApiGateway::Method
+    DependsOn: SQSQueue
+    Properties:
+      RestApiId: !Ref "MessageApi"
+      ResourceId: !Ref "MessageResource"
+      HttpMethod: POST
+      MethodResponses:
+        - StatusCode: 200
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:sqs:path//${AWS::AccountId}/google-pub-sub-${Stage}"
+        Credentials: !GetAtt "SQSRole.Arn"
+        IntegrationHttpMethod: POST
+        IntegrationResponses:
+          - StatusCode: 200
+        RequestParameters:
+          integration.request.querystring.Action: "'SendMessage'"
+          integration.request.querystring.MessageBody: method.request.body
