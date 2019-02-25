@@ -9,9 +9,9 @@ trait MonitoringService {
 
   def put(metricName: String, dimensionName: String, metricValue: String): Unit
 
-  def incrementSkuTypeCounter(metricName: String, skuType: SKUType): Unit
+  def addSkuTypeCounter(metricName: String, skuType: SKUType): Unit
 
-  def incrementDeserializationFailure(reason: String): Unit
+  def addDeserializationFailure(reason: String): Unit
 
 }
 
@@ -36,11 +36,11 @@ class CloudWatchService(cloudWatchAsyncClient: AmazonCloudWatchAsync, qualifier:
     cloudWatchAsyncClient.putMetricDataAsync(request, CloudWatchService.LoggingAsyncHandler)
   }
 
-  def incrementSkuTypeCounter(metricName: String, skuType: SKUType): Unit = {
+  def addSkuTypeCounter(metricName: String, skuType: SKUType): Unit = {
     put(metricName, "sku-type", skuType.toString)
   }
 
-  def incrementDeserializationFailure(reason: String): Unit = {
+  def addDeserializationFailure(reason: String): Unit = {
     put("DeserializationFailure", "DeserializationFailure", reason)
   }
 

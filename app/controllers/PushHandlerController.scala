@@ -13,7 +13,7 @@ import services.MonitoringService
 import utils.FlattenableEither._
 
 @Singleton
-class PushHandlerController @Inject()(cc: ControllerComponents, metricClient: MonitoringService) extends AbstractController(cc) {
+class PushHandlerController @Inject()(cc: ControllerComponents, monitoringService: MonitoringService) extends AbstractController(cc) {
 
   def receivePush(): Action[AnyContent] = Action { implicit request =>
     val res = parsePushMessageBody[GooglePushMessageWrapper](request.body)
@@ -43,7 +43,7 @@ class PushHandlerController @Inject()(cc: ControllerComponents, metricClient: Mo
     jsResult match {
       case JsSuccess(value, _) => Right(value)
       case JsError(errors)     =>
-        metricClient.incrementDeserializationFailure("IncomingPubSubDeserialization")
+        monitoringService.addDeserializationFailure("IncomingPubSubDeserialization")
         Left(DeserializationException("Failure to deserialize push request from pub sub", errors))
     }
   }
