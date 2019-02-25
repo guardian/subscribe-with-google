@@ -37,6 +37,7 @@ topLevelDirectory in Universal := None
 packageName in Universal := normalizedName.value
 
 riffRaffPackageType := (packageBin in Debian).value
+riffRaffManifestProjectName := "support:subscribe-with-google"
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffArtifactResources += (file("cfn.yaml"), "subscribe-with-google-cloudformation/cfn.yaml")
