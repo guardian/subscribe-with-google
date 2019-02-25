@@ -43,7 +43,7 @@ class PushHandlerController @Inject()(cc: ControllerComponents, monitoringServic
     jsResult match {
       case JsSuccess(value, _) => Right(value)
       case JsError(errors)     =>
-        monitoringService.addDeserializationFailure("IncomingPubSubDeserialization")
+        monitoringService.addDeserializationFailure()
         Left(DeserializationException("Failure to deserialize push request from pub sub", errors))
     }
   }

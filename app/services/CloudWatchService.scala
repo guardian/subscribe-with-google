@@ -7,16 +7,31 @@ import play.api.Logger._
 
 trait MonitoringService {
 
+  def put(metricName: String): Unit
+
   def put(metricName: String, dimensionName: String, metricValue: String): Unit
 
   def addSkuTypeCounter(metricName: String, skuType: SKUType): Unit
 
-  def addDeserializationFailure(reason: String): Unit
+  def addDeserializationFailure(): Unit
 
 }
 
 class CloudWatchService(cloudWatchAsyncClient: AmazonCloudWatchAsync, qualifier: String) extends MonitoringService {
   private val namespace = s"support-subscribe-with-google-$qualifier"
+
+  def put(metricName: String): Unit = {
+    val metric = new MetricDatum()
+      .withValue(1d)
+      .withMetricName(metricName)
+      .withUnit("Count")
+
+    val request = new PutMetricDataRequest()
+      .withNamespace(namespace)
+      .withMetricData(metric)
+
+    cloudWatchAsyncClient.putMetricDataAsync(request, CloudWatchService.LoggingAsyncHandler)
+  }
 
   def put(metricName: String, dimensionName: String, metricValue: String): Unit = {
     val skuTypeDimension = new Dimension()
@@ -40,8 +55,8 @@ class CloudWatchService(cloudWatchAsyncClient: AmazonCloudWatchAsync, qualifier:
     put(metricName, "sku-type", skuType.toString)
   }
 
-  def addDeserializationFailure(reason: String): Unit = {
-    put("DeserializationFailure", "DeserializationFailure", reason)
+  def addDeserializationFailure(): Unit = {
+    put("IncomingPubSubDeserialization")
   }
 
 }

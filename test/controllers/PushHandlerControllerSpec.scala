@@ -41,7 +41,7 @@ class PushHandlerControllerSpec extends WordSpecLike with Matchers with GuiceOne
         .withJsonBody(Json.toJson(TestFixtures.googlePushMessageWithInvalidBody)))
 
       status(action) shouldBe NO_CONTENT
-      verify(fixture.mockMetricClient, times(1)).addDeserializationFailure(Match.any())
+      verify(fixture.mockMetricClient, times(1)).addDeserializationFailure()
     }
 
     "handle an empty request body" in {
