@@ -50,11 +50,11 @@
           "default": "",
           "examples": [
             ""
-          ]
+          ],
           "enum": [
             "Paid",
             "Refunded"
-          ]
+          ],
           "pattern": "^(.*)$"
         },
         "amount": {
