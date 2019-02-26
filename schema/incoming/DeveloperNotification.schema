@@ -1,0 +1,133 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "required": [
+    "version",
+    "packageName",
+    "eventTimeMillis"
+  ],
+  "properties": {
+    "version": {
+      "$id": "#/properties/version",
+      "type": "string",
+      "title": "The Version Schema",
+      "default": "",
+      "examples": [
+        "1.0"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "packageName": {
+      "$id": "#/properties/packageName",
+      "type": "string",
+      "title": "The Package Name Schema",
+      "default": "",
+      "examples": [
+        "com.guardian"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "eventTimeMillis": {
+      "$id": "#/properties/eventTimeMillis",
+      "type": "string",
+      "title": "The Event Time Millis Schema",
+      "default": "",
+      "examples": [
+        "1549369095263"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "subscriptionNotification": {
+      "properties": {
+        "version": {
+          "$id": "#/properties/subscriptionNotification/properties/version",
+          "type": "string",
+          "title": "The Version Schema",
+          "default": "1.0",
+          "examples": [
+            "1.0"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "notificationType": {
+          "$id": "#/properties/subscriptionNotification/properties/notificationType",
+          "type": "integer",
+          "title": "The Notification Type Schema",
+          "description": "Notification Type is an enum that represents the type of event: i.e Payment Successful, Subscription Refunded",
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            12,
+            13
+          ]
+        },
+        "purchaseToken": {
+          "$id": "#/properties/subscriptionNotification/properties/purchaseToken",
+          "type": "string",
+          "title": "The Purchase Token Schema",
+          "default": "",
+          "examples": [
+            ""
+          ],
+          "pattern": "^(.*)$"
+        },
+        "subscriptionId": {
+          "$id": "#/properties/subscriptionNotification/properties/subscriptionId",
+          "type": "string",
+          "title": "The Subscription ID Schema",
+          "default": "",
+          "examples": [
+            "uk.co.guardian.subscription"
+          ],
+          "pattern": "^(.*)$"
+        }
+      }
+    },
+    "testNotification": {
+      "properties": {
+        "testNotification": {
+          "$id": "#/properties/testNotification",
+          "type": "object",
+          "title": "The Test Notification Schema",
+          "required": [
+            "version"
+          ],
+          "properties": {
+            "version": {
+              "$id": "#/properties/testNotification/properties/version",
+              "type": "string",
+              "title": "The Version Schema",
+              "default": "",
+              "examples": [
+                "1.0"
+              ],
+              "pattern": "^(.*)$"
+            }
+          }
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "subscriptionNotification"
+      ]
+    },
+    {
+      "required": [
+        "testNotification"
+      ]
+    }
+  ]
+}

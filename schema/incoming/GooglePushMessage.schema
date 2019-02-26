@@ -1,0 +1,65 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "required": [
+    "message",
+    "subscription"
+  ],
+  "properties": {
+    "message": {
+      "$id": "#/properties/message",
+      "type": "object",
+      "title": "The Message Schema",
+      "required": [
+        "data",
+        "messageId",
+        "publishTime"
+      ],
+      "properties": {
+        "data": {
+          "$id": "#/properties/message/properties/data",
+          "type": "string",
+          "title": "The Data Schema",
+          "default": "",
+          "examples": [
+            "JGJhc2U2NFN0cg=="
+          ],
+          "pattern": "^(.*)$"
+        },
+        "messageId": {
+          "$id": "#/properties/message/properties/messageId",
+          "type": "string",
+          "title": "The Message Id Schema",
+          "default": "",
+          "examples": [
+            "messageId"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "publishTime": {
+          "$id": "#/properties/message/properties/publishTime",
+          "type": "string",
+          "title": "The Publish Time Schema",
+          "default": "",
+          "examples": [
+            "1549369095263"
+          ],
+          "pattern": "^(.*)$"
+        }
+      }
+    },
+    "subscription": {
+      "$id": "#/properties/subscription",
+      "type": "string",
+      "title": "The Subscription Schema",
+      "default": "",
+      "examples": [
+        "subscription"
+      ],
+      "pattern": "^(.*)$"
+    }
+  }
+}

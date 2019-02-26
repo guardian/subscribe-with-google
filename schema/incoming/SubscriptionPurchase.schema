@@ -1,0 +1,305 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "required": [
+    "kind",
+    "startTimeMillis",
+    "expiryTimeMillis",
+    "autoResumeTimeMillis",
+    "autoRenewing",
+    "priceCurrencyCode",
+    "priceAmountMicros",
+    "countryCode",
+    "developerPayload",
+    "paymentState",
+    "cancelReason",
+    "userCancellationTimeMillis",
+    "cancelSurveyResult",
+    "orderId",
+    "linkedPurchaseToken",
+    "purchaseType",
+    "priceChange",
+    "profileName",
+    "emailAddress",
+    "givenName",
+    "familyName",
+    "profileId"
+  ],
+  "properties": {
+    "kind": {
+      "$id": "#/properties/kind",
+      "type": "string",
+      "title": "The Kind Schema",
+      "default": "",
+      "examples": [
+        "androidpublisher#subscriptionPurchase"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "startTimeMillis": {
+      "$id": "#/properties/startTimeMillis",
+      "type": "integer",
+      "title": "The Start Time Millis Schema",
+      "default": 0,
+      "examples": [
+        1348734734
+      ]
+    },
+    "expiryTimeMillis": {
+      "$id": "#/properties/expiryTimeMillis",
+      "type": "integer",
+      "title": "The Expiry Time Millis Schema",
+      "default": 0,
+      "examples": [
+        1348734734
+      ]
+    },
+    "autoResumeTimeMillis": {
+      "$id": "#/properties/autoResumeTimeMillis",
+      "type": "integer",
+      "title": "The Auto Resume Time Millis Schema",
+      "default": 0,
+      "examples": [
+        1348734734
+      ]
+    },
+    "autoRenewing": {
+      "$id": "#/properties/autoRenewing",
+      "type": "boolean",
+      "title": "The Auto Renewing Schema",
+      "default": false,
+      "examples": [
+        true
+      ]
+    },
+    "priceCurrencyCode": {
+      "$id": "#/properties/priceCurrencyCode",
+      "type": "string",
+      "title": "The Price Currency Code Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "priceAmountMicros": {
+      "$id": "#/properties/priceAmountMicros",
+      "type": "integer",
+      "title": "The Price Amount Micros Schema",
+      "default": 0,
+      "examples": [
+        1348734734
+      ]
+    },
+    "countryCode": {
+      "$id": "#/properties/countryCode",
+      "type": "string",
+      "title": "The Country Code Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "developerPayload": {
+      "$id": "#/properties/developerPayload",
+      "type": "string",
+      "title": "The Developer Payload Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "paymentState": {
+      "$id": "#/properties/paymentState",
+      "type": "integer",
+      "title": "The Payment State Schema",
+      "default": 0,
+      "examples": [
+        1
+      ]
+    },
+    "cancelReason": {
+      "$id": "#/properties/cancelReason",
+      "type": "integer",
+      "title": "The Cancel Reason Schema",
+      "default": 0,
+      "examples": [
+        1
+      ]
+    },
+    "userCancellationTimeMillis": {
+      "$id": "#/properties/userCancellationTimeMillis",
+      "type": "integer",
+      "title": "The User Cancellation Time Millis Schema",
+      "default": 0,
+      "examples": [
+        1348734734
+      ]
+    },
+    "cancelSurveyResult": {
+      "$id": "#/properties/cancelSurveyResult",
+      "type": "object",
+      "title": "The Cancel Survey Result Schema",
+      "required": [
+        "cancelSurveyReason",
+        "userInputCancelReason"
+      ],
+      "properties": {
+        "cancelSurveyReason": {
+          "$id": "#/properties/cancelSurveyResult/properties/cancelSurveyReason",
+          "type": "integer",
+          "title": "The Cancel Survey Reason Schema",
+          "default": 0,
+          "examples": [
+            1
+          ]
+        },
+        "userInputCancelReason": {
+          "$id": "#/properties/cancelSurveyResult/properties/userInputCancelReason",
+          "type": "string",
+          "title": "The User Input Cancel Reason Schema",
+          "default": "",
+          "examples": [
+            "string"
+          ],
+          "pattern": "^(.*)$"
+        }
+      }
+    },
+    "orderId": {
+      "$id": "#/properties/orderId",
+      "type": "string",
+      "title": "The Order Id Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "linkedPurchaseToken": {
+      "$id": "#/properties/linkedPurchaseToken",
+      "type": "string",
+      "title": "The Linked Purchase Token Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "purchaseType": {
+      "$id": "#/properties/purchaseType",
+      "type": "integer",
+      "title": "The Purchase Type Schema",
+      "default": 0,
+      "examples": [
+        1
+      ]
+    },
+    "priceChange": {
+      "$id": "#/properties/priceChange",
+      "type": "object",
+      "title": "The Price Change Schema",
+      "required": [
+        "newPrice",
+        "state"
+      ],
+      "properties": {
+        "newPrice": {
+          "$id": "#/properties/priceChange/properties/newPrice",
+          "type": "object",
+          "title": "The New Price Schema",
+          "required": [
+            "priceMicros",
+            "currency"
+          ],
+          "properties": {
+            "priceMicros": {
+              "$id": "#/properties/priceChange/properties/newPrice/properties/priceMicros",
+              "type": "string",
+              "title": "The Price Micros Schema",
+              "default": "",
+              "examples": [
+                "string"
+              ],
+              "pattern": "^(.*)$"
+            },
+            "currency": {
+              "$id": "#/properties/priceChange/properties/newPrice/properties/currency",
+              "type": "string",
+              "title": "The Currency Schema",
+              "default": "",
+              "examples": [
+                "string"
+              ],
+              "pattern": "^(.*)$"
+            }
+          }
+        },
+        "state": {
+          "$id": "#/properties/priceChange/properties/state",
+          "type": "integer",
+          "title": "The State Schema",
+          "default": 0,
+          "examples": [
+            1
+          ]
+        }
+      }
+    },
+    "profileName": {
+      "$id": "#/properties/profileName",
+      "type": "string",
+      "title": "The Profile Name Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "emailAddress": {
+      "$id": "#/properties/emailAddress",
+      "type": "string",
+      "title": "The Email Address Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "givenName": {
+      "$id": "#/properties/givenName",
+      "type": "string",
+      "title": "The Given Name Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "familyName": {
+      "$id": "#/properties/familyName",
+      "type": "string",
+      "title": "The Family Name Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "profileId": {
+      "$id": "#/properties/profileId",
+      "type": "string",
+      "title": "The Profile Id Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    }
+  }
+}
