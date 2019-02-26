@@ -1,0 +1,297 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "required": [
+    "packageName",
+    "sku",
+    "status",
+    "purchaseType",
+    "defaultPrice",
+    "prices",
+    "listings",
+    "defaultLanguage",
+    "subscriptionPeriod",
+    "season",
+    "trialPeriod"
+  ],
+  "properties": {
+    "packageName": {
+      "$id": "#/properties/packageName",
+      "type": "string",
+      "title": "The Package Name Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "sku": {
+      "$id": "#/properties/sku",
+      "type": "string",
+      "title": "The Sku Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "status": {
+      "$id": "#/properties/status",
+      "type": "string",
+      "title": "The Status Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "purchaseType": {
+      "$id": "#/properties/purchaseType",
+      "type": "string",
+      "title": "The Purchase Type Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "defaultPrice": {
+      "$id": "#/properties/defaultPrice",
+      "type": "object",
+      "title": "The Default Price Schema",
+      "required": [
+        "priceMicros",
+        "currency"
+      ],
+      "properties": {
+        "priceMicros": {
+          "$id": "#/properties/defaultPrice/properties/priceMicros",
+          "type": "string",
+          "title": "The Price Micros Schema",
+          "default": "",
+          "examples": [
+            "string"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "currency": {
+          "$id": "#/properties/defaultPrice/properties/currency",
+          "type": "string",
+          "title": "The Currency Schema",
+          "default": "",
+          "examples": [
+            "string"
+          ],
+          "pattern": "^(.*)$"
+        }
+      }
+    },
+    "prices": {
+      "$id": "#/properties/prices",
+      "title": "The Prices Schema",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "priceMicros": "string",
+            "currency": "string"
+          }
+        }
+      }
+    },
+    "listings": {
+      "$id": "#/properties/listings",
+      "title": "The Listings Schema",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "string",
+            "description": "string"
+          }
+        }
+      }
+    },
+    "defaultLanguage": {
+      "$id": "#/properties/defaultLanguage",
+      "type": "string",
+      "title": "The Default Language Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "subscriptionPeriod": {
+      "$id": "#/properties/subscriptionPeriod",
+      "type": "string",
+      "title": "The Subscription Period Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "season": {
+      "$id": "#/properties/season",
+      "type": "object",
+      "title": "The Season Schema",
+      "required": [
+        "start",
+        "end",
+        "prorations"
+      ],
+      "properties": {
+        "start": {
+          "$id": "#/properties/season/properties/start",
+          "type": "object",
+          "title": "The Start Schema",
+          "required": [
+            "month",
+            "day"
+          ],
+          "properties": {
+            "month": {
+              "$id": "#/properties/season/properties/start/properties/month",
+              "type": "integer",
+              "title": "The Month Schema",
+              "default": 0,
+              "examples": [
+                1
+              ]
+            },
+            "day": {
+              "$id": "#/properties/season/properties/start/properties/day",
+              "type": "integer",
+              "title": "The Day Schema",
+              "default": 0,
+              "examples": [
+                1
+              ]
+            }
+          }
+        },
+        "end": {
+          "$id": "#/properties/season/properties/end",
+          "type": "object",
+          "title": "The End Schema",
+          "required": [
+            "month",
+            "day"
+          ],
+          "properties": {
+            "month": {
+              "$id": "#/properties/season/properties/end/properties/month",
+              "type": "integer",
+              "title": "The Month Schema",
+              "default": 0,
+              "examples": [
+                1
+              ]
+            },
+            "day": {
+              "$id": "#/properties/season/properties/end/properties/day",
+              "type": "integer",
+              "title": "The Day Schema",
+              "default": 0,
+              "examples": [
+                1
+              ]
+            }
+          }
+        },
+        "prorations": {
+          "$id": "#/properties/season/properties/prorations",
+          "type": "array",
+          "title": "The Prorations Schema",
+          "items": {
+            "$id": "#/properties/season/properties/prorations/items",
+            "type": "object",
+            "title": "The Items Schema",
+            "required": [
+              "start",
+              "defaultPrice"
+            ],
+            "properties": {
+              "start": {
+                "$id": "#/properties/season/properties/prorations/items/properties/start",
+                "type": "object",
+                "title": "The Start Schema",
+                "required": [
+                  "month",
+                  "day"
+                ],
+                "properties": {
+                  "month": {
+                    "$id": "#/properties/season/properties/prorations/items/properties/start/properties/month",
+                    "type": "integer",
+                    "title": "The Month Schema",
+                    "default": 0,
+                    "examples": [
+                      1
+                    ]
+                  },
+                  "day": {
+                    "$id": "#/properties/season/properties/prorations/items/properties/start/properties/day",
+                    "type": "integer",
+                    "title": "The Day Schema",
+                    "default": 0,
+                    "examples": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "defaultPrice": {
+                "$id": "#/properties/season/properties/prorations/items/properties/defaultPrice",
+                "type": "object",
+                "title": "The Defaultprice Schema",
+                "required": [
+                  "priceMicros",
+                  "currency"
+                ],
+                "properties": {
+                  "priceMicros": {
+                    "$id": "#/properties/season/properties/prorations/items/properties/defaultPrice/properties/priceMicros",
+                    "type": "string",
+                    "title": "The Pricemicros Schema",
+                    "default": "",
+                    "examples": [
+                      "string"
+                    ],
+                    "pattern": "^(.*)$"
+                  },
+                  "currency": {
+                    "$id": "#/properties/season/properties/prorations/items/properties/defaultPrice/properties/currency",
+                    "type": "string",
+                    "title": "The Currency Schema",
+                    "default": "",
+                    "examples": [
+                      "string"
+                    ],
+                    "pattern": "^(.*)$"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "trialPeriod": {
+      "$id": "#/properties/trialPeriod",
+      "type": "string",
+      "title": "The Trialperiod Schema",
+      "default": "",
+      "examples": [
+        "string"
+      ],
+      "pattern": "^(.*)$"
+    }
+  }
+}

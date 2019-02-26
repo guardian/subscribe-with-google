@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "packageName": "com.guardian",
+  "eventTimeMillis": "1549369095263",
+  "subscriptionNotification": {
+    "version": "1.0",
+    "notificationType": 2,
+    "purchaseToken": "",
+    "subscriptionId": "uk.co.guardian.subscription"
+  }
+}
