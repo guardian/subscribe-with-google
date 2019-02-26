@@ -2,16 +2,18 @@ package controllers
 
 import java.nio.channels.NonReadableChannelException
 
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import exceptions.{DeserializationException, NonJsonBodyException}
 import javax.inject.{Inject, Singleton}
 import model.{DeveloperNotification, GooglePushMessageWrapper}
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.Logger._
+import services.MonitoringService
 import utils.FlattenableEither._
 
 @Singleton
-class PushHandlerController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
+class PushHandlerController @Inject()(cc: ControllerComponents, monitoringService: MonitoringService) extends AbstractController(cc) {
 
   def receivePush(): Action[AnyContent] = Action { implicit request =>
     val res = parsePushMessageBody[GooglePushMessageWrapper](request.body)
@@ -40,7 +42,9 @@ class PushHandlerController @Inject()(cc: ControllerComponents) extends Abstract
   private def resultToEither[A](jsResult: JsResult[A]): Either[Exception, A] = {
     jsResult match {
       case JsSuccess(value, _) => Right(value)
-      case JsError(errors)     => Left(DeserializationException("Failure to deserialize push request from pub sub", errors))
+      case JsError(errors)     =>
+        monitoringService.addDeserializationFailure()
+        Left(DeserializationException("Failure to deserialize push request from pub sub", errors))
     }
   }
 }

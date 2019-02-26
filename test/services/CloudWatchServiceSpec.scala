@@ -16,7 +16,7 @@ class CloudWatchServiceSpec extends WordSpec with Matchers with ScalaFutures wit
     "put" in {
       val cloudWatchService = new CloudWatchService(mockAmazonCloudWatchAsync, "TEST")
 
-      cloudWatchService.put("metric-name", SKUType.Recurring)
+      cloudWatchService.addSkuTypeCounter("metric-name", SKUType.Recurring)
 
       val skuTypeDimension = new Dimension()
         .withName("sku-type")

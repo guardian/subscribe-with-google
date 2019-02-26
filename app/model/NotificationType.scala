@@ -9,7 +9,7 @@ sealed abstract class NotificationType(val value: Int, name: String) extends Int
 case object NotificationType extends IntEnum[NotificationType] with IntPlayJsonValueEnum[NotificationType] {
   override def values: immutable.IndexedSeq[NotificationType] = findValues
 
-//  (1) SUBSCRIPTION_RECOVERED - A subscription was recovered from account hold.
+  //  (1) SUBSCRIPTION_RECOVERED - A subscription was recovered from account hold.
   case object SubscriptionRecovered extends NotificationType(1, "SUBSCRIPTION_RECOVERED")
   //  (2) SUBSCRIPTION_RENEWED - An active subscription was renewed.
   case object SubscriptionRenewed extends NotificationType(2, "SUBSCRIPTION_RENEWED")
@@ -29,4 +29,9 @@ case object NotificationType extends IntEnum[NotificationType] with IntPlayJsonV
   case object SubscriptionPriceChangeConfirmed extends NotificationType(8, "SUBSCRIPTION_PRICE_CHANGE_CONFIRMED")
   //  (9) SUBSCRIPTION_DEFERRED - A subscription's recurrence time has been extended.
   case object SubscriptionDeferred extends NotificationType(9, "SUBSCRIPTION_DEFERRED")
+  //  (12) SUBSCRIPTION_REVOKED - A subscription has been revoked from the user before the expiration time.
+  case object SubscriptionRevoked extends NotificationType(12, "SUBSCRIPTION_REVOKED")
+  //  (13) SUBSCRIPTION_EXPIRED - A subscription has expired.
+  case object SubscriptionExpired extends NotificationType(13, "SUBSCRIPTION_EXPIRED")
+
 }
