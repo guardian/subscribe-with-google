@@ -247,28 +247,31 @@ Resources:
   MessageApiAuthLambda:
     Type: AWS::Lambda::Function
     Properties:
+      Environment:
+        Variables:
+          SECRET_KEY: !Sub '{{resolve:secretsmanager:subscribe_with_google_pub_sub_${Stage}:SecretString:secret_key}}'
       Code:
         ZipFile: !Sub >
-          function generatePolicy(principalId, effect, resource) {
+          function generatePolicy(effect, resource) {
             return {
-              'principalId': principalId,
-              'policyDocument': {
-                'Version': '2012-10-17',
-                'Statement': [{
-                  'Action': 'execute-api:Invoke',
-                  'Effect': effect,
-                  'Resource': resource
+              principalId: 'user',
+              policyDocument: {
+                Version: '2012-10-17',
+                Statement: [{
+                  Action: 'execute-api:Invoke',
+                  Effect: effect,
+                  Resource: resource
                 }]
               }
             };
           }
 
-          export.handler = (event, context, cb) => {
+          exports.handler = (event, context, cb) => {
             const secret = event.queryStringParameters.secret;
-            if (secret == '{{resolve:secretsmanager:subscribe_with_google_pub_sub_{Stage}:SecretString:secret_key}}') {
-              cb(null, generatePolicy('user', 'Allow', event.methodArn));
+            if (secret == process.env.SECRET_KEY) {
+              cb(null, generatePolicy('Allow', event.methodArn));
             } else {
-              cb(null, generatePolicy('user', 'Deny', event.methodArn));
+              cb(null, generatePolicy('Deny', event.methodArn));
             }
           }
       Handler: index.handler
@@ -298,8 +301,8 @@ Resources:
     Type: AWS::ApiGateway::Authorizer
     Properties:
       AuthorizerCredentials: !GetAtt MessageApiAuthorizeRole.Arn
-      AuthorizeUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/20115-03-31/functions/${MessageApiAuthLambda.Arn}/invocations
-      IdentifySource: method.request.querystring.secret
+      AuthorizerUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/20  15-03-31/functions/${MessageApiAuthLambda.Arn}/invocations
+      IdentitySource: method.request.querystring.secret
       Name: api-gateway-google-pub-sub-api-authorizer
       RestApiId: !Ref MessageApi
       Type: REQUEST
