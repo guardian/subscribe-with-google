@@ -231,6 +231,82 @@ Resources:
                 Effect: Allow
                 Resource: !GetAtt SQSQueue.Arn
 
+  MessageApiAuthLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  MessageApiAuthLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Environment:
+        Variables:
+          SECRET_KEY: !Sub '{{resolve:secretsmanager:subscribe_with_google_pub_sub_${Stage}:SecretString:secret_key}}'
+      Code:
+        ZipFile: !Sub >
+          function generatePolicy(effect, resource) {
+            return {
+              principalId: 'user',
+              policyDocument: {
+                Version: '2012-10-17',
+                Statement: [{
+                  Action: 'execute-api:Invoke',
+                  Effect: effect,
+                  Resource: resource
+                }]
+              }
+            };
+          }
+
+          exports.handler = (event, context, cb) => {
+            const secret = event.queryStringParameters.secret;
+            if (secret == process.env.SECRET_KEY) {
+              cb(null, generatePolicy('Allow', event.methodArn));
+            } else {
+              cb(null, generatePolicy('Deny', event.methodArn));
+            }
+          }
+      Handler: index.handler
+      Role: !GetAtt MessageApiAuthLambdaRole.Arn
+      Runtime: nodejs8.10
+
+  MessageApiAuthorizeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: Lambda
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              Effect: Allow
+              Action: lambda:invokeFunction
+              Resource: !GetAtt MessageApiAuthLambda.Arn
+
+  MessageApiAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      AuthorizerCredentials: !GetAtt MessageApiAuthorizeRole.Arn
+      AuthorizerUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/20  15-03-31/functions/${MessageApiAuthLambda.Arn}/invocations
+      IdentitySource: method.request.querystring.secret
+      Name: api-gateway-google-pub-sub-api-authorizer
+      RestApiId: !Ref MessageApi
+      Type: REQUEST
+
   MessageApi:
     Type: AWS::ApiGateway::RestApi
     Properties:
@@ -253,7 +329,8 @@ Resources:
       HttpMethod: POST
       MethodResponses:
         - StatusCode: 200
-      AuthorizationType: NONE
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref MessageApiAuthorizer
       Integration:
         Type: AWS
         Uri: !Sub "arn:aws:apigateway:${AWS::Region}:sqs:path//${AWS::AccountId}/google-pub-sub-${Stage}"
