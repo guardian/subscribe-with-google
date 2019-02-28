@@ -10,7 +10,7 @@ deployments:
     parameters:
       templatePath: cfn.yaml
       amiTags:
-        Recipe: subscribe-with-google
+        Recipe: xenial-membership
         AmigoStage: PROD
       amiEncrypted: true
   subscribe-with-google:
