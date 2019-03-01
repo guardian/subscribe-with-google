@@ -28,6 +28,7 @@ libraryDependencies ++= Seq(
   "com.github.blemale" %% "scaffeine" % "2.5.0" % "compile",
   "com.amazonaws" % "aws-java-sdk-cloudwatch" % AWSJavaSDKVersion,
   "com.gu" %% "simple-configuration-ssm" % "1.4.1",
+  "com.lightbend.akka" %% "akka-stream-alpakka-sqs" % "1.0-M2",
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
   "org.mockito" % "mockito-all" % "1.10.19" % "test",
   "de.leanovate.play-mockws" %% "play-mockws" % "2.7.0" % Test

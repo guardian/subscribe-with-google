@@ -22,14 +22,14 @@ class GoogleAccessTokenClient @Inject()(
     config: Configuration
 )(implicit executionContext: ExecutionContext)
     extends AccessTokenClient {
-  val apiTokenUrl = "https://accounts.google.com/o/oauth2/token"
+  private val apiTokenUrl = "https://accounts.google.com/o/oauth2/token"
 
-  val refreshToken = config.get[String]("google.playDeveloperRefreshToken")
-  val swgClientId = config.get[String]("swg.clientId")
-  val swgClientSecret = config.get[String]("swg.clientSecret")
-  val swgRedirectUri = config.get[String]("swg.redirectUri")
+  private val refreshToken = config.get[String]("google.playDeveloperRefreshToken")
+  private val swgClientId = config.get[String]("swg.clientId")
+  private val swgClientSecret = config.get[String]("swg.clientSecret")
+  private val swgRedirectUri = config.get[String]("swg.redirectUri")
 
-  val cache: AsyncLoadingCache[String, GoogleAccessToken] =
+  private val cache: AsyncLoadingCache[String, GoogleAccessToken] =
     Scaffeine()
       .recordStats()
       .maximumSize(1)
@@ -44,7 +44,7 @@ class GoogleAccessTokenClient @Inject()(
 
   def get(): Future[GoogleAccessToken] = cache.get("accessToken")
 
-  def getAccessTokenRequest(): Future[GoogleAccessToken] = {
+  private def getAccessTokenRequest(): Future[GoogleAccessToken] = {
     val params = Seq(
       "grant_type" -> "refresh_token",
       "refresh_token" -> refreshToken,

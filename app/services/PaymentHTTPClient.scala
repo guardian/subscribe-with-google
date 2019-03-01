@@ -16,8 +16,8 @@ class PaymentHTTPClient @Inject()(
     config: Configuration
 )(implicit executionContext: ExecutionContext)
     extends HTTPClient {
-  val apiBaseUrl = config.get[String]("guardian.paymentApiBaseUrl")
-  val swgBaseUrl = s"""$apiBaseUrl/contribute/one-off/swg"""
+  private val apiBaseUrl = config.get[String]("guardian.paymentApiBaseUrl")
+  private val swgBaseUrl = s"$apiBaseUrl/contribute/one-off/swg"
 
   def createPaymentRecord(paymentRecord: PaymentRecord): Future[Unit] =
     wsClient
