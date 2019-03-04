@@ -6,7 +6,7 @@
 GET     /                           controllers.StatusController.index
 
 
-GET     /oauth                      controllers.OAuthController.oauth
+GET     /entitlements               controllers.AuthorizationController.entitlements
 
 GET     /pingback                   controllers.StatusController.ping
 GET     /healthcheck                controllers.StatusController.healthcheck
