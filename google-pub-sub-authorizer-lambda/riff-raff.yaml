@@ -1,0 +1,22 @@
+regions:
+  - eu-west-1
+stacks:
+  - support
+deployments:
+  google-pub-sub-authorizer:
+    type: aws-lambda
+    dependencies: [google-pub-sub-authorizer-cloudformation]
+    parameters:
+      fileName: google-pub-sub-authorizer.zip
+      bucket: membership-dist
+      prefixStack: false
+      functionNames:
+        - google-pub-sub-api-authorizer-
+  google-pub-sub-authorizer-cloudformation:
+    type: cloud-formation
+    app: google-pub-sub-authorizer
+    parameters:
+      prependStackToCloudFormationStackName: false
+      cloudFormationStackName: google-pub-sub-authorizer
+      templatePath: cloudformation/cloudformation.yaml
+      cloudFormationStackByTags: false
