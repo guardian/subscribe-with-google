@@ -213,7 +213,7 @@ Resources:
   SQSRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: api-gateway-google-pub-sub-sqs-access-role
+      RoleName: !Sub "api-gateway-google-pub-sub-sqs-access-${Stage}-role"
       Path: /
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
