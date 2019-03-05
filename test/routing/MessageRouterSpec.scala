@@ -288,5 +288,26 @@ class MessageRouterSpec extends WordSpecLike with Matchers with MockitoSugar wit
       val value = result.futureValue.right.get
       value shouldBe ()
     }
+
+    "fail when unable to communiate with paymentapi" in {
+      val fixture = new MessageRouterFixture()
+
+      when(fixture.mockSkuClient.getSkuType(Match.any()))
+        .thenReturn(Future.successful(Right(SKUType.Single)))
+
+      when(fixture.mockGoogleHttpClient.getSubscriptionPurchase(Match.any(), Match.any()))
+        .thenReturn(Future.successful(fixture.subscriptionPurchase))
+
+      when(fixture.mockPaymentApiClient.createPaymentRecord(Match.any()))
+        .thenReturn(Future.failed(new TimeoutException("Futures timed out")))
+
+      val testWrapper: Either[Exception, GooglePushMessageWrapper] = Right(fixture.googlePushMessageWrapper)
+
+      val result = fixture.messageRouter.handleMessage(() => testWrapper)
+
+      val value = result.futureValue.left.get
+      value.getMessage shouldEqual new TimeoutException("Futures timed out").getMessage
+      value shouldBe a[TimeoutException]
+    }
   }
 }
