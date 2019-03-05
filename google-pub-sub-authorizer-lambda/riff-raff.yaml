@@ -3,6 +3,7 @@ stacks: [support]
 deployments:
   google-pub-sub-authorizer:
     type: aws-lambda
+    dependencies: [google-pub-sub-authorizer-cloudformation]
     parameters:
       fileName: google-pub-sub-authorizer.zip
       bucket: membership-dist
@@ -11,7 +12,6 @@ deployments:
         - google-pub-sub-authorizer-
   google-pub-sub-authorizer-cloudformation:
     type: cloud-formation
-    dependencies: [google-pub-sub-authorizer]
     app: google-pub-sub-authorizer
     parameters:
       prependStackToCloudFormationStackName: false
