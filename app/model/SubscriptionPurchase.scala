@@ -20,7 +20,7 @@ case class SubscriptionPurchase(kind: String,
                                 linkedPurchaseToken: String,
                                 purchaseType: Double,
                                 profileName: String,
-                                emailAddress: String,
+                                emailAddress: Option[String],
                                 givenName: String,
                                 familyName: String,
                                 profileId: String)

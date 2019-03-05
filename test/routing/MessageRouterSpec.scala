@@ -1,10 +1,10 @@
 package routing
 
 import java.util.Base64
+import java.util.concurrent.TimeoutException
 
-import exceptions.{DeserializationException, IgnoreTestNotificationException, UnsupportedSKUException}
-import fixtures.TestFixtures
-import fixtures.TestFixtures.developerNotificationWithSubscription
+import exceptions._
+import model.PaymentStatus.Paid
 import model._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpecLike}
@@ -37,6 +37,112 @@ class MessageRouterFixture extends MockitoSugar {
                                                             .getBytes)),
                                                       "messageId",
                                                       "")
+
+  val subscriptionPurchaseNotification =
+    SubscriptionNotification("1.0", NotificationType.SubscriptionPurchased, "purchaseToken", "skuID")
+
+  val subscriptionPriceChangeNotification =
+    SubscriptionNotification("1.0", NotificationType.SubscriptionPriceChangeConfirmed, "purchaseToken", "skuID")
+
+  val purchaseDeveloperNotificationWithSubscription: DeveloperNotification =
+    SubscriptionDeveloperNotification("1.0", "com.gu", 1L, subscriptionPurchaseNotification)
+
+  val priceChangeDeveloperNotificationWithSubscription: DeveloperNotification =
+    SubscriptionDeveloperNotification("1.0", "com.gu", 1L, subscriptionPriceChangeNotification)
+
+  val googlePushMessage = GooglePushMessage(None,
+                                            new String(
+                                              Base64.getEncoder.encode(
+                                                Json
+                                                  .asciiStringify(
+                                                    Json.toJson(purchaseDeveloperNotificationWithSubscription)
+                                                  )
+                                                  .getBytes)),
+                                            "messageId",
+                                            "")
+
+  val priceChangeGooglePushMessage = GooglePushMessage(
+    None,
+    new String(
+      Base64.getEncoder.encode(
+        Json
+          .asciiStringify(
+            Json.toJson(priceChangeDeveloperNotificationWithSubscription)
+          )
+          .getBytes)),
+    "messageId",
+    "")
+
+  val googlePushMessageWithInvalidBody = GooglePushMessage(None,
+                                                           new String(
+                                                             Base64.getEncoder.encode(
+                                                               Json
+                                                                 .asciiStringify(
+                                                                   Json.toJson("{}")
+                                                                 )
+                                                                 .getBytes)),
+                                                           "messageId",
+                                                           "")
+
+  val googlePushMessageWrapper = GooglePushMessageWrapper(googlePushMessage, "subscription")
+  val priceChangeGooglePushMessageWrapper = GooglePushMessageWrapper(priceChangeGooglePushMessage, "subscription")
+
+  val noEmailSubscriptionPurchase = SubscriptionPurchase(
+    "mykind",
+    1l,
+    2d,
+    false,
+    "GBP",
+    5000000D,
+    "UK",
+    "nopayloadhere",
+    1d,
+    0d,
+    1l,
+    CancelSurveyResult(1d, "This is most likely optional"),
+    "893248675345",
+    "nolinkedpurchasetoken",
+    1d,
+    "openprofile",
+    None,
+    "Optional",
+    "Optional",
+    "OptionalProfileId"
+  )
+
+  val subscriptionPurchase = SubscriptionPurchase(
+    "mykind",
+    1l,
+    2d,
+    false,
+    "GBP",
+    5000000D,
+    "UK",
+    "nopayloadhere",
+    1d,
+    0d,
+    1l,
+    CancelSurveyResult(1d, "This is most likely optional"),
+    "893248675345",
+    "nolinkedpurchasetoken",
+    1d,
+    "openprofile",
+    Some("guardian@guardian.com"),
+    "Optional",
+    "Optional",
+    "OptionalProfileId"
+  )
+
+  val paymentRecord = PaymentRecord(
+    "Optional",
+    "guardian@guardian.com",
+    Paid,
+    BigDecimal("5000000"),
+    "GBP",
+    "UK",
+    PaymentRecord.generatePaymentId(subscriptionPurchase),
+    System.currentTimeMillis()
+  )
 
 }
 
@@ -71,13 +177,116 @@ class MessageRouterSpec extends WordSpecLike with Matchers with MockitoSugar wit
       when(fixture.mockSkuClient.getSkuType(Match.any()))
         .thenReturn(Future.successful(Left(UnsupportedSKUException("SKU UNSUPPORTEDSKU is not a supported SKU"))))
 
-      val testWrapper: Either[Exception, GooglePushMessageWrapper] = Right(TestFixtures.googlePushMessageWrapper)
+      val testWrapper: Either[Exception, GooglePushMessageWrapper] = Right(fixture.googlePushMessageWrapper)
 
       val result = fixture.messageRouter.handleMessage(() => testWrapper)
 
       result.futureValue.left.get shouldBe UnsupportedSKUException("SKU UNSUPPORTEDSKU is not a supported SKU")
     }
 
-  }
+    "discard a non-payment notification" in {
+      val fixture = new MessageRouterFixture()
 
+      when(fixture.mockSkuClient.getSkuType(Match.any()))
+        .thenReturn(Future.successful(Right(SKUType.Single)))
+
+      val testWrapper: Either[Exception, GooglePushMessageWrapper] = Right(fixture.priceChangeGooglePushMessageWrapper)
+
+      val result = fixture.messageRouter.handleMessage(() => testWrapper)
+
+      result.futureValue.left.get shouldBe UnsupportedNotificationTypeException(
+        "This notification type is not supported")
+    }
+
+    "fail on a timeout for subscription purchase" in {
+      val fixture = new MessageRouterFixture()
+
+      when(fixture.mockSkuClient.getSkuType(Match.any()))
+        .thenReturn(Future.successful(Right(SKUType.Single)))
+
+      when(fixture.mockGoogleHttpClient.getSubscriptionPurchase(Match.any(), Match.any()))
+        .thenReturn(Future.failed(new TimeoutException("Futures timed out")))
+
+      val testWrapper: Either[Exception, GooglePushMessageWrapper] = Right(fixture.googlePushMessageWrapper)
+
+      val result = fixture.messageRouter.handleMessage(() => testWrapper)
+
+      val value = result.futureValue.left.get
+      value.getMessage shouldEqual new TimeoutException("Futures timed out").getMessage
+      value shouldBe a[TimeoutException]
+    }
+
+    "return a not implemented exception for single contribution purchases without an email" in {
+      val fixture = new MessageRouterFixture()
+
+      when(fixture.mockSkuClient.getSkuType(Match.any()))
+        .thenReturn(Future.successful(Right(SKUType.Single)))
+
+      when(fixture.mockGoogleHttpClient.getSubscriptionPurchase(Match.any(), Match.any()))
+        .thenReturn(Future.successful(fixture.noEmailSubscriptionPurchase))
+
+      val testWrapper: Either[Exception, GooglePushMessageWrapper] = Right(fixture.googlePushMessageWrapper)
+
+      val result = fixture.messageRouter.handleMessage(() => testWrapper)
+
+      val value = result.futureValue.left.get
+      value shouldBe UnsupportedOffPlatformPurchaseException(
+        "Currently we do not support contributions without email addresses")
+    }
+
+    "return a not implemented exception for recurring contribution purchases without an email" in {
+      val fixture = new MessageRouterFixture()
+
+      when(fixture.mockSkuClient.getSkuType(Match.any()))
+        .thenReturn(Future.successful(Right(SKUType.Recurring)))
+
+      when(fixture.mockGoogleHttpClient.getSubscriptionPurchase(Match.any(), Match.any()))
+        .thenReturn(Future.successful(fixture.noEmailSubscriptionPurchase))
+
+      val testWrapper: Either[Exception, GooglePushMessageWrapper] = Right(fixture.googlePushMessageWrapper)
+
+      val result = fixture.messageRouter.handleMessage(() => testWrapper)
+
+      val value = result.futureValue.left.get
+      value shouldBe UnsupportedOffPlatformPurchaseException(
+        "Currently we do not support contributions without email addresses")
+    }
+
+    "return a not implemented exception for recurring contribution purchases" in {
+      val fixture = new MessageRouterFixture()
+
+      when(fixture.mockSkuClient.getSkuType(Match.any()))
+        .thenReturn(Future.successful(Right(SKUType.Recurring)))
+
+      when(fixture.mockGoogleHttpClient.getSubscriptionPurchase(Match.any(), Match.any()))
+        .thenReturn(Future.successful(fixture.subscriptionPurchase))
+
+      val testWrapper: Either[Exception, GooglePushMessageWrapper] = Right(fixture.googlePushMessageWrapper)
+
+      val result = fixture.messageRouter.handleMessage(() => testWrapper)
+
+      val value = result.futureValue.left.get
+      value.getMessage shouldBe "Recurring payments are not supported"
+      value shouldBe a[Exception]
+    }
+
+    "return a payment record for a valid single contribution purchase" in {
+      val fixture = new MessageRouterFixture()
+
+      when(fixture.mockSkuClient.getSkuType(Match.any()))
+        .thenReturn(Future.successful(Right(SKUType.Single)))
+
+      when(fixture.mockGoogleHttpClient.getSubscriptionPurchase(Match.any(), Match.any()))
+        .thenReturn(Future.successful(fixture.subscriptionPurchase))
+
+      when(fixture.mockPaymentApiClient.createPaymentRecord(Match.any())).thenReturn(Future.successful())
+
+      val testWrapper: Either[Exception, GooglePushMessageWrapper] = Right(fixture.googlePushMessageWrapper)
+
+      val result = fixture.messageRouter.handleMessage(() => testWrapper)
+
+      val value = result.futureValue.right.get
+      value shouldBe ()
+    }
+  }
 }
