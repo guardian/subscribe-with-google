@@ -7,7 +7,7 @@
   "projectName": "support::google-pub-sub-authorizer",
   "cloudformation": "cloudformation.yaml",
   "riffraffFile": "riff-raff.yaml",
-  "buildDir": "google-pub-sub-authorizer-lambda",
+  "buildDir": ".",
   "isAwsLambda": true,
   "uploadArtefact": true,
   "scripts": {
