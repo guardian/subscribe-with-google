@@ -2,14 +2,11 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: google-pub-sub-api
 Parameters:
   Stage:
-    Description: Applied directly as a tag
     Type: String
   Stack:
-    Description: Applied directly as a tag
     Type: String
     Default: support
   App:
-    Description: Applied directly as a tag
     Type: String
     Default: google-pub-sub-authorizer
 Resources:
@@ -55,7 +52,7 @@ Resources:
   MessageApiAuthLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub google-pub-sub-api-authorizer-${Stage}
+      FunctionName: !Sub google-pub-sub-authorizer-${Stage}
       Environment:
         Variables:
           SECRET_KEY: !Sub '{{resolve:secretsmanager:subscribe_with_google_pub_sub_${Stage}:SecretString:secret_key}}'

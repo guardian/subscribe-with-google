@@ -11,7 +11,7 @@ deployments:
       bucket: membership-dist
       prefixStack: false
       functionNames:
-        - google-pub-sub-api-authorizer-
+        - google-pub-sub-authorizer-
   google-pub-sub-authorizer-cloudformation:
     type: cloud-formation
     app: google-pub-sub-authorizer
