@@ -1,0 +1,19 @@
+{
+  "name": "google-pub-sub-authorizer",
+  "description": "Authorizor for Google Pub Sub API. Currently used by Subscribe with Google",
+  "repository": "https://github.com/guardian/subscribe-with-google",
+  "version": "1.0.0",
+  "private": true,
+  "projectName": "support::google-pub-sub-authorizer",
+  "cloudformation": "cloudformation.yaml",
+  "riffraffFile": "riff-raff.yaml",
+  "buildDir": ".",
+  "isAwsLambda": true,
+  "uploadArtefact": true,
+  "scripts": {
+    "deploy-lambda": "VERBOSE=true ARTEFACT_PATH=$PWD riffraff-artefact"
+  },
+  "devDependencies": {
+    "node-riffraff-artefact": "^2.0.1"
+  }
+}
