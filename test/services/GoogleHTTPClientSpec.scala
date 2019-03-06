@@ -203,7 +203,7 @@ class GoogleHTTPClientSpec
           "linkedPurchaseToken",
           1,
           "profileName",
-          "email",
+          Some("email"),
           "givenName",
           "familyName",
           "profileId",

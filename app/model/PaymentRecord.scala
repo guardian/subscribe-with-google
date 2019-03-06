@@ -12,4 +12,9 @@ case class PaymentRecord(firstName: String,
 
 object PaymentRecord {
   implicit val format = Json.format[PaymentRecord]
+
+  //todo: Change this filth
+  def generatePaymentId(paymentRecord: SubscriptionPurchase): String = {
+    paymentRecord.hashCode().toString
+  }
 }
