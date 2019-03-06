@@ -2,7 +2,12 @@ package routing
 
 import cats.data.EitherT
 import cats.implicits._
-import exceptions.{DeserializationException, IgnoreTestNotificationException, UnsupportedNotificationTypeException, UnsupportedOffPlatformPurchaseException}
+import exceptions.{
+  DeserializationException,
+  IgnoreTestNotificationException,
+  UnsupportedNotificationTypeException,
+  UnsupportedOffPlatformPurchaseException
+}
 import model.PaymentStatus.{Paid, Refunded}
 import model.{SubscriptionDeveloperNotification, _}
 import play.api.Logger._
@@ -48,38 +53,35 @@ object ContributionWithSubscriptionPurchase {
 class MessageRouter(googleHTTPClient: GoogleHTTPClient, paymentClient: PaymentHTTPClient, skuClient: SKUClient)(
     implicit ec: ExecutionContext) {
 
-  def handleMessage(message: () => Either[Exception, GooglePushMessageWrapper])
-    : Future[Either[Exception, Unit]] = {
-    val googlePushMessageWrapper = message.apply()
+  def handleMessage(message: () => Either[Exception, GooglePushMessageWrapper]): Future[Either[Exception, Unit]] = {
+    val googlePushMessageWrapper = EitherT.fromEither[Future](message())
 
     val exceptionOrNotification = for {
-      wrapper <- EitherT.fromEither[Future](googlePushMessageWrapper)
-      developerNotification <- EitherT.fromEither[Future](
-        parsePushMessageBody[DeveloperNotification](Json.parse(wrapper.message.decodedData)))
-      subscriptionDeveloperNotification <- EitherT.fromEither[Future](
-        convertToSubscriptionDeveloperNotification(developerNotification))
-      contributionWithType <- EitherT(supportedSku(subscriptionDeveloperNotification))
-      supportedNotificationType <- EitherT.fromEither[Future](checkNotificationType(contributionWithType))
-      enrichedContribution <- EitherT(enrichWithSubscriptionPurchase(supportedNotificationType))
-      paymentRecord <- EitherT.fromEither[Future](createPaymentRecord(enrichedContribution))
-      paymentRequest <- EitherT(sendRequestToPaymentAPI(paymentRecord))
+      wrapper <- googlePushMessageWrapper
+      developerNotification <- parsePushMessageBody[DeveloperNotification](Json.parse(wrapper.message.decodedData))
+      subscriptionDeveloperNotification <- convertToSubscriptionDeveloperNotification(developerNotification)
+      contributionWithType <- supportedSku(subscriptionDeveloperNotification)
+      supportedNotificationType <- checkNotificationType(contributionWithType)
+      enrichedContribution <- enrichWithSubscriptionPurchase(supportedNotificationType)
+      paymentRecord <- createPaymentRecord(enrichedContribution)
+      paymentRequest <- sendRequestToPaymentAPI(paymentRecord)
     } yield paymentRequest
 
     exceptionOrNotification.value
   }
 
   def convertToSubscriptionDeveloperNotification(developerNotification: DeveloperNotification)
-    : Either[IgnoreTestNotificationException, SubscriptionDeveloperNotification] = {
-    developerNotification match {
+    : EitherT[Future, IgnoreTestNotificationException, SubscriptionDeveloperNotification] = {
+    EitherT.fromEither[Future](developerNotification match {
       case sdn: SubscriptionDeveloperNotification => Right(sdn)
       case test: TestDeveloperNotification =>
         Left(IgnoreTestNotificationException("Received Test notification - Ignoring"))
       //cloudwatch stat out
-    }
+    })
   }
 
-  def supportedSku(
-      subscriptionDeveloperNotification: SubscriptionDeveloperNotification): Future[Either[Exception, Contribution]] = {
+  def supportedSku(subscriptionDeveloperNotification: SubscriptionDeveloperNotification)
+    : EitherT[Future, Exception, Contribution] = {
     EitherT(skuClient.getSkuType(subscriptionDeveloperNotification.subscriptionNotification.subscriptionId))
       .bimap(
         e => e, {
@@ -87,61 +89,69 @@ class MessageRouter(googleHTTPClient: GoogleHTTPClient, paymentClient: PaymentHT
           case SKUType.Single    => SingleContribution(subscriptionDeveloperNotification)
         }
       )
-      .value
   }
 
   //todo: test notification types for refund
-  def checkNotificationType(contribution: Contribution): Either[Exception, Contribution] = {
-    contribution.subscriptionDeveloperNotification.subscriptionNotification.notificationType match {
-      case NotificationType.SubscriptionPurchased => Right(contribution)
-      case _                                      => Left(UnsupportedNotificationTypeException("This notification type is not supported"))
-    }
+  def checkNotificationType(contribution: Contribution): EitherT[Future, Exception, Contribution] = {
+    EitherT.fromEither[Future](
+      contribution.subscriptionDeveloperNotification.subscriptionNotification.notificationType match {
+        case NotificationType.SubscriptionPurchased => Right(contribution)
+        case _ =>
+          Left(UnsupportedNotificationTypeException("This notification type is not supported"))
+      })
   }
 
-  def sendRequestToPaymentAPI(paymentRecord: PaymentRecord): Future[Either[Exception, Unit]] = {
+  def sendRequestToPaymentAPI(paymentRecord: PaymentRecord): EitherT[Future, Exception, Unit] = {
     val paymentResult = paymentRecord.status match {
       case Paid     => paymentClient.createPaymentRecord(paymentRecord)
       case Refunded => paymentClient.refundPaymentRecord(paymentRecord)
     }
-    paymentResult
-      .map(res => Right(res))
-      .recover{
-      case e: Exception => Left(e)
-    }
+
+    EitherT(
+      paymentResult
+        .map(res => Right(res))
+        .recover {
+          case e: Exception => Left(e)
+        })
   }
 
   def enrichWithSubscriptionPurchase(
-      contribution: Contribution): Future[Either[Exception, ContributionWithSubscriptionPurchase]] = {
-    googleHTTPClient
-      .getSubscriptionPurchase(
-        SKUCode(contribution.subscriptionDeveloperNotification.subscriptionNotification.subscriptionId),
-        contribution.subscriptionDeveloperNotification.subscriptionNotification.purchaseToken
-      )
-      .map(subPurchase => Right(ContributionWithSubscriptionPurchase(contribution, subPurchase)))
-      .recover { case e: Exception => Left(e) }
+      contribution: Contribution): EitherT[Future, Exception, ContributionWithSubscriptionPurchase] = {
+    EitherT(
+      googleHTTPClient
+        .getSubscriptionPurchase(
+          SKUCode(contribution.subscriptionDeveloperNotification.subscriptionNotification.subscriptionId),
+          contribution.subscriptionDeveloperNotification.subscriptionNotification.purchaseToken
+        )
+        .map(subPurchase => Right(ContributionWithSubscriptionPurchase(contribution, subPurchase)))
+        .recover { case e: Exception => Left(e) })
   }
 
-  def createPaymentRecord(
-      contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase): Either[Exception, PaymentRecord] = {
-    (contributionWithSubscriptionPurchase, contributionWithSubscriptionPurchase.subscriptionPurchase.emailAddress) match {
+  def createPaymentRecord(contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase)
+    : EitherT[Future, Exception, PaymentRecord] = {
+    val paymentRecord = (contributionWithSubscriptionPurchase,
+                         contributionWithSubscriptionPurchase.subscriptionPurchase.emailAddress) match {
       case (single: SingleContributionWithSubscriptionPurchase, None) =>
         Left(
           UnsupportedOffPlatformPurchaseException("Currently we do not support contributions without email addresses"))
-      case (single: SingleContributionWithSubscriptionPurchase, Some(email)) => createSingleContributionPaymentRecord(single)
+      case (single: SingleContributionWithSubscriptionPurchase, Some(_)) =>
+        createSingleContributionPaymentRecord(single)
       case (recurring: RecurringContributionWithSubscriptionPurchase, None) =>
         Left(
           UnsupportedOffPlatformPurchaseException("Currently we do not support contributions without email addresses"))
 
-      case (recurring: RecurringContributionWithSubscriptionPurchase, Some(email)) =>
+      case (recurring: RecurringContributionWithSubscriptionPurchase, Some(_)) =>
         //todo: Better exception required
         Left(new Exception("Recurring payments are not supported"))
     }
+
+    EitherT.fromEither[Future](paymentRecord)
   }
 
   def createSingleContributionPaymentRecord(contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase)
     : Either[UnsupportedNotificationTypeException, PaymentRecord] = {
     (contributionWithSubscriptionPurchase.subscriptionDeveloperNotification.subscriptionNotification.notificationType,
-      contributionWithSubscriptionPurchase.subscriptionPurchase.emailAddress) match {
+     contributionWithSubscriptionPurchase.subscriptionPurchase.emailAddress) match {
       case (NotificationType.SubscriptionPurchased, Some(email)) =>
         val purchaseData = contributionWithSubscriptionPurchase.subscriptionPurchase
         Right(
@@ -161,11 +171,11 @@ class MessageRouter(googleHTTPClient: GoogleHTTPClient, paymentClient: PaymentHT
     }
   }
 
-  private def parsePushMessageBody[A: Reads](json: JsValue): Either[Exception, A] = {
-    json.validate[A] match {
+  private def parsePushMessageBody[A: Reads](json: JsValue): EitherT[Future, Exception, A] = {
+    EitherT.fromEither[Future](json.validate[A] match {
       case JsSuccess(value, _) => Right(value)
       case JsError(errors) =>
         Left(DeserializationException("Failure to deserialize push request from pub sub", errors))
-    }
+    })
   }
 }
