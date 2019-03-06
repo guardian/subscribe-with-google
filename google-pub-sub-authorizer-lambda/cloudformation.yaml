@@ -86,7 +86,7 @@ Resources:
     Type: AWS::ApiGateway::Authorizer
     Properties:
       AuthorizerCredentials: !GetAtt MessageApiAuthorizeRole.Arn
-      AuthorizerUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/20  15-03-31/functions/${MessageApiAuthLambda.Arn}/invocations
+      AuthorizerUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MessageApiAuthLambda.Arn}/invocations
       IdentitySource: method.request.querystring.secret
       Name: api-gateway-google-pub-sub-api-authorizer
       RestApiId: !Ref MessageApi
@@ -118,7 +118,7 @@ Resources:
       AuthorizerId: !Ref MessageApiAuthorizer
       Integration:
         Type: AWS
-        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:sqs:path//${AWS::AccountId}/google-pub-sub-${Stage}"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:sqs:path//${AWS::AccountId}/google-pub-sub-queue-${Stage}"
         Credentials: !GetAtt "SQSRole.Arn"
         IntegrationHttpMethod: POST
         IntegrationResponses:
