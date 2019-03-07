@@ -78,8 +78,8 @@ class CloudWatchService(cloudWatchAsyncClient: AmazonCloudWatchAsync, qualifier:
     put("IncomingPubSubDeserialization")
   }
   override def addMessageReceived(): Unit = put("MessageReceived")
-  override def addSendSuccessful(): Unit = put("PaymentInformationSent")
-  override def addSendFailure(): Unit = put("FailureToSend")
+  override def addSendSuccessful(): Unit = put("PaymentAPIRecordSuccess")
+  override def addSendFailure(): Unit = put("PaymentAPIRecordFailure")
   override def addUnsupportedPaymentType(): Unit = put("UnsupportedPaymentType")
   override def addUnsupportedNotificationType(): Unit = put("UnsupportedNotificationType")
   override def addReceivedTestNotification(): Unit = put("ReceivedTestNotification")
