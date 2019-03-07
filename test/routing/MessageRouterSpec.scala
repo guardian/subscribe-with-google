@@ -10,7 +10,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpecLike}
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
-import services.{GoogleHTTPClient, PaymentHTTPClient, SKUClient}
+import services.{GoogleHTTPClient, MonitoringService, PaymentHTTPClient, SKUClient}
 import org.mockito.Mockito._
 import org.mockito.{Matchers => Match}
 
@@ -22,7 +22,10 @@ class MessageRouterFixture extends MockitoSugar {
   val mockGoogleHttpClient = mock[GoogleHTTPClient]
   val mockPaymentApiClient = mock[PaymentHTTPClient]
   val mockSkuClient = mock[SKUClient]
-  val messageRouter = new MessageRouter(mockGoogleHttpClient, mockPaymentApiClient, mockSkuClient)
+  val mockMonitoringService = mock[MonitoringService]
+
+  val messageRouter =
+    new MessageRouter(mockGoogleHttpClient, mockPaymentApiClient, mockSkuClient, mockMonitoringService)
 
   val testNotification = new TestNotification("1.0")
   val testDeveloperNotification = TestDeveloperNotification("1.0", "org.gu", 1234l, testNotification)
@@ -249,7 +252,7 @@ class MessageRouterSpec extends WordSpecLike with Matchers with MockitoSugar wit
 
       val value = result.futureValue.left.get
       value shouldBe UnsupportedOffPlatformPurchaseException(
-        "Currently we do not support contributions without email addresses")
+        "Currently we do not support recurring contributions without email addresses")
     }
 
     "return a not implemented exception for recurring contribution purchases" in {
