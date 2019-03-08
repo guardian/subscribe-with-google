@@ -15,6 +15,25 @@ trait MonitoringService {
 
   def addDeserializationFailure(): Unit
 
+  def addMessageReceived(): Unit
+
+  def addSendSuccessful(): Unit
+
+  def addSendFailure(): Unit
+
+  def addUnsupportedPaymentType(): Unit
+
+  def addUnsupportedNotificationType(): Unit
+
+  def addReceivedTestNotification(): Unit
+
+  def addUnsupportedSKU(): Unit
+
+  def addFailureToGetSubscriptionPurchase(): Unit
+
+  def addUnsupportedPlatformPurchase(): Unit
+
+
 }
 
 class CloudWatchService(cloudWatchAsyncClient: AmazonCloudWatchAsync, qualifier: String) extends MonitoringService {
@@ -58,7 +77,15 @@ class CloudWatchService(cloudWatchAsyncClient: AmazonCloudWatchAsync, qualifier:
   def addDeserializationFailure(): Unit = {
     put("IncomingPubSubDeserialization")
   }
-
+  override def addMessageReceived(): Unit = put("MessageReceived")
+  override def addSendSuccessful(): Unit = put("PaymentAPIRecordSuccess")
+  override def addSendFailure(): Unit = put("PaymentAPIRecordFailure")
+  override def addUnsupportedPaymentType(): Unit = put("UnsupportedPaymentType")
+  override def addUnsupportedNotificationType(): Unit = put("UnsupportedNotificationType")
+  override def addReceivedTestNotification(): Unit = put("ReceivedTestNotification")
+  override def addUnsupportedSKU(): Unit = put("UnsupportedSKU")
+  override def addFailureToGetSubscriptionPurchase(): Unit = put("FailureToGetSubscriptionPurchase")
+  override def addUnsupportedPlatformPurchase(): Unit = put("UnsupportedPlatformPurchase")
 }
 
 object CloudWatchService {
