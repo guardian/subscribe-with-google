@@ -1,0 +1,9 @@
+package routing.adt
+
+import model.SubscriptionDeveloperNotification
+sealed trait Contribution {
+  val subscriptionDeveloperNotification: SubscriptionDeveloperNotification
+}
+case class RecurringContribution(subscriptionDeveloperNotification: SubscriptionDeveloperNotification)
+    extends Contribution
+case class SingleContribution(subscriptionDeveloperNotification: SubscriptionDeveloperNotification) extends Contribution
