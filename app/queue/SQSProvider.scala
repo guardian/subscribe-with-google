@@ -6,17 +6,25 @@ import akka.stream.alpakka.sqs.scaladsl.{SqsAckSink, SqsSource}
 import akka.stream.scaladsl.{Flow, Keep, RestartSource, Sink, Source}
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
-import com.amazonaws.services.sqs.model.Message
+import com.amazonaws.services.sqs.model.{Message, QueueDoesNotExistException}
 import com.amazonaws.services.sqs.{AmazonSQSAsync, AmazonSQSAsyncClientBuilder}
 import com.typesafe.config.ConfigFactory
+import javax.inject.Inject
+import javax.inject.Singleton
+import play.api.Logger._
 
+import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 
-class SQSProvider()(implicit system: ActorSystem, materializer: Materializer) {
+trait SQSListener
+
+@Singleton
+class SQSListenerImpl @Inject()()(implicit system: ActorSystem, materializer: Materializer) extends SQSListener {
+
+  logger.info("Starting up SQS Consumer")
+
   val config = ConfigFactory.load()
 
-
-  val queueName = config.getString("sqs.queue-name")
   val queueUrl = config.getString("sqs.queue-url")
   val sqsRegion = config.getString("sqs.region")
   val sqsSecretKey = config.getString("sqs.secret-key")
@@ -32,28 +40,42 @@ class SQSProvider()(implicit system: ActorSystem, materializer: Materializer) {
 
   system.registerOnTermination(awsSqsClient.shutdown())
 
+  queueExists(queueUrl)
+
   //todo: Investigate required custom settings
   val sqsSettings = SqsSourceSettings()
-
   val sink = SqsAckSink(queueUrl)
 
   val graph = SqsSource(queueUrl, sqsSettings)
+    .map(f => {
+      logger.debug(s"Message received :: ${f.getBody}")
+      f
+    })
     .via(Flow.fromFunction(handleMessage))
     .toMat(sink)(Keep.right)
 
-  RestartSource.withBackoff(
-    3 seconds,
-    30 seconds,
-    0.2
-  ) { () =>
-    Source.fromFuture(graph.run())
-  }.runWith(Sink.ignore)
-
+  RestartSource
+    .withBackoff(
+      3 seconds,
+      30 seconds,
+      0.2
+    ) { () =>
+      Source.fromFuture(graph.run())
+    }
+    .runWith(Sink.ignore)
 
   private def handleMessage(message: Message) = {
-    message.getBody
-
     MessageAction.Delete(message)
   }
 
+  private def queueExists(queueUrl: String): Unit = {
+    try {
+      awsSqsClient.getQueueAttributes(queueUrl, Seq("All").asJava)
+      logger.info(s"Queue at $queueUrl found.")
+    } catch {
+      case queueDoesNotExistException: QueueDoesNotExistException =>
+        logger.error(s"The queue with url $queueUrl does not exist.")
+        throw queueDoesNotExistException
+    }
+  }
 }
