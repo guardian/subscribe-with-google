@@ -12,6 +12,7 @@ import com.typesafe.config.ConfigFactory
 import javax.inject.Inject
 import javax.inject.Singleton
 import play.api.Logger._
+import routing.MessageRouter
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -19,7 +20,7 @@ import scala.concurrent.duration._
 trait SQSListener
 
 @Singleton
-class SQSListenerImpl @Inject()()(implicit system: ActorSystem, materializer: Materializer) extends SQSListener {
+class SQSListenerImpl @Inject()(messageRouter: MessageRouter)(implicit system: ActorSystem, materializer: Materializer) extends SQSListener {
 
   logger.info("Starting up SQS Consumer")
 
