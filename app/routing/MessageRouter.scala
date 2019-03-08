@@ -2,53 +2,15 @@ package routing
 
 import cats.data.EitherT
 import cats.implicits._
-import exceptions.{
-  DeserializationException,
-  IgnoreTestNotificationException,
-  UnsupportedNotificationTypeException,
-  UnsupportedOffPlatformPurchaseException
-}
+import exceptions.{DeserializationException, IgnoreTestNotificationException, UnsupportedNotificationTypeException, UnsupportedOffPlatformPurchaseException}
 import model.PaymentStatus.{Paid, Refunded}
 import model.{SubscriptionDeveloperNotification, _}
 import play.api.Logger._
 import play.api.libs.json._
+import routing.adt._
 import services.{GoogleHTTPClient, MonitoringService, PaymentHTTPClient, SKUClient}
 
 import scala.concurrent.{ExecutionContext, Future}
-
-sealed trait Contribution {
-  val subscriptionDeveloperNotification: SubscriptionDeveloperNotification
-}
-case class RecurringContribution(subscriptionDeveloperNotification: SubscriptionDeveloperNotification)
-    extends Contribution
-case class SingleContribution(subscriptionDeveloperNotification: SubscriptionDeveloperNotification) extends Contribution
-
-sealed trait ContributionWithSubscriptionPurchase {
-  val subscriptionDeveloperNotification: SubscriptionDeveloperNotification
-  val subscriptionPurchase: SubscriptionPurchase
-}
-
-case class SingleContributionWithSubscriptionPurchase(
-    subscriptionDeveloperNotification: SubscriptionDeveloperNotification,
-    subscriptionPurchase: SubscriptionPurchase)
-    extends ContributionWithSubscriptionPurchase
-case class RecurringContributionWithSubscriptionPurchase(
-    subscriptionDeveloperNotification: SubscriptionDeveloperNotification,
-    subscriptionPurchase: SubscriptionPurchase)
-    extends ContributionWithSubscriptionPurchase
-
-object ContributionWithSubscriptionPurchase {
-
-  def apply(contribution: Contribution,
-            subscriptionPurchase: SubscriptionPurchase): ContributionWithSubscriptionPurchase = {
-    contribution match {
-      case c: SingleContribution =>
-        SingleContributionWithSubscriptionPurchase(c.subscriptionDeveloperNotification, subscriptionPurchase)
-      case c: RecurringContribution =>
-        RecurringContributionWithSubscriptionPurchase(c.subscriptionDeveloperNotification, subscriptionPurchase)
-    }
-  }
-}
 
 class MessageRouter(googleHTTPClient: GoogleHTTPClient,
                     paymentClient: PaymentHTTPClient,
