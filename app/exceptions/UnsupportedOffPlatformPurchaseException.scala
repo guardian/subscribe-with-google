@@ -1,3 +1,3 @@
 package exceptions
 
-case class UnsupportedOffPlatformPurchaseException(msg: String) extends Exception(msg)
+case class UnsupportedOffPlatformPurchaseException(msg: String) extends Exception(msg) with IgnorableException

@@ -1,3 +1,3 @@
 package exceptions
 
-case class IgnoreTestNotificationException(msg: String) extends Exception(msg)
+case class IgnoreTestNotificationException(msg: String) extends Exception(msg) with IgnorableException

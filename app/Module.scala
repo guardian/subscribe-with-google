@@ -3,6 +3,7 @@ import com.google.inject.AbstractModule
 import com.gu.{AppIdentity, AwsIdentity}
 import play.api.{Configuration, Environment}
 import queue.{SQSListener, SQSListenerImpl}
+import routing.{MessageRouter, MessageRouterImpl}
 import services._
 
 class Module(env: Environment, configuration: Configuration) extends AbstractModule {
@@ -12,6 +13,12 @@ class Module(env: Environment, configuration: Configuration) extends AbstractMod
 
     bind(classOf[AccessTokenClient])
       .to(classOf[GoogleAccessTokenClient])
+
+    bind(classOf[MessageRouter])
+      .to(classOf[MessageRouterImpl])
+
+    bind(classOf[SKUClient])
+        .to(classOf[SKUClientImpl])
 
     bind(classOf[SQSListener])
       .to(classOf[SQSListenerImpl]).asEagerSingleton()

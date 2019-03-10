@@ -1,4 +1,6 @@
 package queue
+
+import cats.implicits._
 import akka.actor.ActorSystem
 import akka.stream.Materializer
 import akka.stream.alpakka.sqs.{MessageAction, SqsSourceSettings}
@@ -9,18 +11,24 @@ import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.sqs.model.{Message, QueueDoesNotExistException}
 import com.amazonaws.services.sqs.{AmazonSQSAsync, AmazonSQSAsyncClientBuilder}
 import com.typesafe.config.ConfigFactory
+import exceptions.DeserializationException
 import javax.inject.Inject
 import javax.inject.Singleton
+import model.GooglePushMessageWrapper
 import play.api.Logger._
+import play.api.libs.json.Json
 import routing.MessageRouter
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 
+
+
 trait SQSListener
 
 @Singleton
-class SQSListenerImpl @Inject()(messageRouter: MessageRouter)(implicit system: ActorSystem, materializer: Materializer) extends SQSListener {
+class SQSListenerImpl @Inject()(messageRouter: MessageRouter)(implicit system: ActorSystem, materializer: Materializer)
+    extends SQSListener {
 
   logger.info("Starting up SQS Consumer")
 
@@ -66,6 +74,16 @@ class SQSListenerImpl @Inject()(messageRouter: MessageRouter)(implicit system: A
     .runWith(Sink.ignore)
 
   private def handleMessage(message: Message) = {
+    val parseMessage = () => {
+      val messageBody = Json.parse(message.getBody)
+      messageBody("body")
+        .validate[GooglePushMessageWrapper].asEither.leftMap { errs =>
+        DeserializationException(s"Unable to deserialize GooglePushMessage :: ${message.getBody}", errs)
+      }
+    }
+
+    messageRouter.handleMessage(parseMessage)
+
     MessageAction.Delete(message)
   }
 

@@ -2,7 +2,8 @@ package routing
 
 import cats.data.EitherT
 import cats.implicits._
-import exceptions.{DeserializationException, IgnoreTestNotificationException, UnsupportedNotificationTypeException, UnsupportedOffPlatformPurchaseException}
+import exceptions._
+import javax.inject.{Inject, Singleton}
 import model.PaymentStatus.{Paid, Refunded}
 import model.{SubscriptionDeveloperNotification, _}
 import play.api.Logger._
@@ -12,10 +13,15 @@ import services.{GoogleHTTPClient, MonitoringService, PaymentHTTPClient, SKUClie
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MessageRouter(googleHTTPClient: GoogleHTTPClient,
+trait MessageRouter {
+  def handleMessage(message: () => Either[Exception, GooglePushMessageWrapper]): Future[Either[Exception, Unit]]
+}
+
+@Singleton
+class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
                     paymentClient: PaymentHTTPClient,
                     skuClient: SKUClient,
-                    monitoringService: MonitoringService)(implicit ec: ExecutionContext) {
+                    monitoringService: MonitoringService)(implicit ec: ExecutionContext) extends MessageRouter {
 
   def handleMessage(message: () => Either[Exception, GooglePushMessageWrapper]): Future[Either[Exception, Unit]] = {
     monitoringService.addMessageReceived()
@@ -31,6 +37,14 @@ class MessageRouter(googleHTTPClient: GoogleHTTPClient,
       paymentRecord <- createPaymentRecord(enrichedContribution)
       paymentRequest <- sendRequestToPaymentAPI(paymentRecord)
     } yield paymentRequest
+
+    exceptionOrNotification.value.map{
+      case Left(e: IgnorableException) =>
+        logger.info(s"Ignorable exception encountered ${e.getMessage}")
+        Left(e)
+      case Left(e) => Left(e)
+      case Right(u) => Right(u)
+    }
 
     exceptionOrNotification.value
   }
