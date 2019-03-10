@@ -49,7 +49,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
     exceptionOrNotification.value
   }
 
-  def convertToSubscriptionDeveloperNotification(developerNotification: DeveloperNotification)
+  private def convertToSubscriptionDeveloperNotification(developerNotification: DeveloperNotification)
     : EitherT[Future, IgnoreTestNotificationException, SubscriptionDeveloperNotification] = {
     EitherT.fromEither[Future](developerNotification match {
       case sdn: SubscriptionDeveloperNotification => Right(sdn)
@@ -59,7 +59,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
     })
   }
 
-  def supportedSku(subscriptionDeveloperNotification: SubscriptionDeveloperNotification)
+  private def supportedSku(subscriptionDeveloperNotification: SubscriptionDeveloperNotification)
     : EitherT[Future, Exception, Contribution] = {
     EitherT(skuClient.getSkuType(subscriptionDeveloperNotification.subscriptionNotification.subscriptionId))
       .bimap(
@@ -74,7 +74,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
   }
 
   //todo: test notification types for refund
-  def checkNotificationType(contribution: Contribution): EitherT[Future, Exception, Contribution] = {
+  private def checkNotificationType(contribution: Contribution): EitherT[Future, Exception, Contribution] = {
     EitherT.fromEither[Future](
       contribution.subscriptionDeveloperNotification.subscriptionNotification.notificationType match {
         case NotificationType.SubscriptionPurchased => Right(contribution)
@@ -84,7 +84,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
       })
   }
 
-  def sendRequestToPaymentAPI(paymentRecord: PaymentRecord): EitherT[Future, Exception, Unit] = {
+  private def sendRequestToPaymentAPI(paymentRecord: PaymentRecord): EitherT[Future, Exception, Unit] = {
     val paymentResult = paymentRecord.status match {
       case Paid     => paymentClient.createPaymentRecord(paymentRecord)
       case Refunded => paymentClient.refundPaymentRecord(paymentRecord)
@@ -104,7 +104,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
         })
   }
 
-  def enrichWithSubscriptionPurchase(
+  private def enrichWithSubscriptionPurchase(
       contribution: Contribution): EitherT[Future, Exception, ContributionWithSubscriptionPurchase] = {
     EitherT(
       googleHTTPClient
@@ -121,7 +121,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
     )
   }
 
-  def createPaymentRecord(contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase)
+  private def createPaymentRecord(contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase)
     : EitherT[Future, Exception, PaymentRecord] = {
     val paymentRecord = (contributionWithSubscriptionPurchase,
                          contributionWithSubscriptionPurchase.subscriptionPurchase.emailAddress) match {
@@ -144,7 +144,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
     EitherT.fromEither[Future](paymentRecord)
   }
 
-  def createSingleContributionPaymentRecord(contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase)
+  private def createSingleContributionPaymentRecord(contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase)
     : Either[UnsupportedNotificationTypeException, PaymentRecord] = {
     (contributionWithSubscriptionPurchase.subscriptionDeveloperNotification.subscriptionNotification.notificationType,
      contributionWithSubscriptionPurchase.subscriptionPurchase.emailAddress) match {
