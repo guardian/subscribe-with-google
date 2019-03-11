@@ -63,7 +63,8 @@ class GoogleAccessTokenClient @Inject()(
       .get() map { response =>
       {
         if (response.status != Status.OK) {
-          logger.error(s"Failure to retrieve correct response when calling $apiTokenUrl with params: $params: Response code ${response.status} with body : ${response.body}")
+          logger.error(
+            s"Failure to retrieve correct response when calling $apiTokenUrl with params: $params: Response code ${response.status} with body : ${response.body}")
           throw GoogleHTTPClientException(response.status, "Server error")
         } else {
           Json.parse(response.body).validate[GoogleAccessToken].asEither match {
