@@ -1,5 +1,5 @@
 package exceptions
 
-trait IgnorableException {
+trait IgnorableException extends Exception {
 
 }
