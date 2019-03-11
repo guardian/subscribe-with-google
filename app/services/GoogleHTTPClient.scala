@@ -17,9 +17,11 @@ class GoogleHTTPClient @Inject()(
     config: Configuration
 )(implicit executionContext: ExecutionContext)
     extends HTTPClient {
-  val apiBaseUrl = "https://www.googleapis.com/androidpublisher/v3/applications"
 
   val packageName = config.get[String]("google.packageName")
+  val googleApiEndpoint = config.get[String]("google.api-endpoint")
+
+  val apiBaseUrl = s"$googleApiEndpoint/androidpublisher/v3/applications"
 
   def getSKU(sku: SKUCode): Future[SKU] =
     getRequest[SKU](wsClient, s"inappproducts/${sku.sku}")

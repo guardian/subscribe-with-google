@@ -42,7 +42,9 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
       case Left(e: IgnorableException) =>
         logger.info(s"Ignorable exception encountered ${e.getMessage}")
         Left(e)
-      case Left(e) => Left(e)
+      case Left(e) =>
+        logger.error("Failure to complete payment :: This is a recoverable error - placing message back on queue", e)
+        Left(e)
       case Right(u) => Right(u)
     }
 
@@ -93,11 +95,14 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
     EitherT(
       paymentResult
         .map{ res =>
+          logger.info("Successfully sent to payment-api")
           monitoringService.addSendSuccessful()
           Right(res)
         }
         .recover {
           case e: Exception => {
+            //todo: Check how compliant this is - logging out customer emails???
+            logger.error(s"Failure to send to payment-api :: payment-record: $paymentRecord")
             monitoringService.addSendFailure()
             Left(e)
           }
