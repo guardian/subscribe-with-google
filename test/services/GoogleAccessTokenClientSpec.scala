@@ -26,6 +26,9 @@ class GoogleAccessTokenClientSpec
         "swg.clientId" -> "someClientId",
         "swg.clientSecret" -> "someClientSecret",
         "swg.redirectUri" -> "someRedirectUri",
+        "google.account-endpoint" -> "https://accounts.google.com",
+        "google.api-endpoint" -> "https://www.googleapis.com"
+
       )
     )
 
@@ -93,7 +96,7 @@ class GoogleAccessTokenClientSpec
 
       whenReady(googleAccessTokenClient.get() failed, timeout, interval) {
         response =>
-          response shouldBe an [DeserializationException]
+          response shouldBe a[DeserializationException]
       }
     }
 

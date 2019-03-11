@@ -30,7 +30,7 @@ class GoogleAccessTokenClient @Inject()(
   private val swgRedirectUri = config.get[String]("swg.redirectUri")
 
   private val googleAccountEndpoint = config.get[String]("google.account-endpoint")
-  //todo: Change to config
+
   private val apiTokenUrl = s"$googleAccountEndpoint/o/oauth2/token"
 
   private val cache: AsyncLoadingCache[String, GoogleAccessToken] =
@@ -54,7 +54,7 @@ class GoogleAccessTokenClient @Inject()(
       "refresh_token" -> refreshToken,
       "client_id" -> swgClientId,
       "client_secret" -> swgClientSecret,
-      "redirect_uri" -> swgRedirectUri
+      "redirect_uri" -> swgRedirectUri,
     )
 
     wsClient
