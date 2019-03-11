@@ -54,7 +54,7 @@ class GoogleAccessTokenClient @Inject()(
       "refresh_token" -> refreshToken,
       "client_id" -> swgClientId,
       "client_secret" -> swgClientSecret,
-      "redirect_uri" -> swgRedirectUri,
+      "redirect_uri" -> swgRedirectUri
     )
 
     wsClient
