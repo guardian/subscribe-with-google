@@ -8,8 +8,8 @@ import scala.concurrent.duration._
 import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.Json
-import play.api.libs.ws.WSClient
 import play.api.Logger._
+import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
