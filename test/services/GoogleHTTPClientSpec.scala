@@ -204,11 +204,11 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
           "orderId",
           "linkedPurchaseToken",
           1,
-          "profileName",
+          Some("profileName"),
           Some("email"),
-          "givenName",
-          "familyName",
-          "profileId",
+          Some("givenName"),
+          Some("familyName"),
+          Some("profileId"),
         )
       }
     }

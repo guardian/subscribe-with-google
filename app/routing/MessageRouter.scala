@@ -157,7 +157,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
         val purchaseData = contributionWithSubscriptionPurchase.subscriptionPurchase
         Right(
           PaymentRecord(
-            purchaseData.givenName,
+            purchaseData.customerNameOpt.getOrElse(""),
             email,
             Paid,
             purchaseData.priceAmountMicros,

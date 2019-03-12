@@ -1,5 +1,7 @@
 package model
 
+import cats.kernel.Semigroup
+import cats.implicits._
 import play.api.libs.json.Json
 
 case class CancelSurveyResult(cancelSurveyReason: Double, userInputCancelReason: String)
@@ -19,11 +21,15 @@ case class SubscriptionPurchase(kind: String,
                                 orderId: String,
                                 linkedPurchaseToken: String,
                                 purchaseType: Double,
-                                profileName: String,
+                                profileName: Option[String],
                                 emailAddress: Option[String],
-                                givenName: String,
-                                familyName: String,
-                                profileId: String)
+                                givenName: Option[String],
+                                familyName: Option[String],
+                                profileId: Option[String]) {
+
+
+  val customerNameOpt: Option[String] = Semigroup[Option[String]].combine(givenName.map(str => str + " "), familyName)
+}
 
 object CancelSurveyResult {
   implicit val format = Json.format[CancelSurveyResult]

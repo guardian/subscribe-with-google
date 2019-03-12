@@ -106,11 +106,11 @@ class MessageRouterFixture extends MockitoSugar {
     "893248675345",
     "nolinkedpurchasetoken",
     1d,
-    "openprofile",
+    Some("openprofile"),
     None,
-    "Optional",
-    "Optional",
-    "OptionalProfileId"
+    Some("Optional"),
+    Some("Optional"),
+    Some("OptionalProfileId")
   )
 
   val subscriptionPurchase = SubscriptionPurchase(
@@ -129,11 +129,11 @@ class MessageRouterFixture extends MockitoSugar {
     "893248675345",
     "nolinkedpurchasetoken",
     1d,
-    "openprofile",
+    Some("openprofile"),
     Some("guardian@guardian.com"),
-    "Optional",
-    "Optional",
-    "OptionalProfileId"
+    Some("Optional"),
+    Some("Optional"),
+    Some("OptionalProfileId")
   )
 
   val paymentRecord = PaymentRecord(
