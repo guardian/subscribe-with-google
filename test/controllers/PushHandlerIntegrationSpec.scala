@@ -12,7 +12,7 @@ class PushHandlerIntegrationSpec extends PlaySpec with GuiceOneServerPerSuite {
 
   override def fakeApplication() = new GuiceApplicationBuilder().configure().build()
 
-  "Receive notification and post to payment API" in {
+  "Receive notification and post to payment API" ignore {
     val wsClient = app.injector.instanceOf[WSClient]
     val url = s"http://localhost:$port/push/handle-message"
 
