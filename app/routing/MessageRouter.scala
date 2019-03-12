@@ -2,7 +2,8 @@ package routing
 
 import cats.data.EitherT
 import cats.implicits._
-import exceptions.{DeserializationException, IgnoreTestNotificationException, UnsupportedNotificationTypeException, UnsupportedOffPlatformPurchaseException}
+import exceptions._
+import javax.inject.{Inject, Singleton}
 import model.PaymentStatus.{Paid, Refunded}
 import model.{SubscriptionDeveloperNotification, _}
 import play.api.Logger._
@@ -12,10 +13,15 @@ import services.{GoogleHTTPClient, MonitoringService, PaymentHTTPClient, SKUClie
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MessageRouter(googleHTTPClient: GoogleHTTPClient,
+trait MessageRouter {
+  def handleMessage(message: () => Either[Exception, GooglePushMessageWrapper]): Future[Either[Exception, Unit]]
+}
+
+@Singleton
+class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
                     paymentClient: PaymentHTTPClient,
                     skuClient: SKUClient,
-                    monitoringService: MonitoringService)(implicit ec: ExecutionContext) {
+                    monitoringService: MonitoringService)(implicit ec: ExecutionContext) extends MessageRouter {
 
   def handleMessage(message: () => Either[Exception, GooglePushMessageWrapper]): Future[Either[Exception, Unit]] = {
     monitoringService.addMessageReceived()
@@ -32,10 +38,20 @@ class MessageRouter(googleHTTPClient: GoogleHTTPClient,
       paymentRequest <- sendRequestToPaymentAPI(paymentRecord)
     } yield paymentRequest
 
+    exceptionOrNotification.value.map{
+      case Left(e: IgnorableException) =>
+        logger.info(s"Ignorable exception encountered ${e.getMessage}")
+        Left(e)
+      case Left(e) =>
+        logger.error("Failure to complete payment :: This is a recoverable error - placing message back on queue", e)
+        Left(e)
+      case Right(u) => Right(u)
+    }
+
     exceptionOrNotification.value
   }
 
-  def convertToSubscriptionDeveloperNotification(developerNotification: DeveloperNotification)
+  private def convertToSubscriptionDeveloperNotification(developerNotification: DeveloperNotification)
     : EitherT[Future, IgnoreTestNotificationException, SubscriptionDeveloperNotification] = {
     EitherT.fromEither[Future](developerNotification match {
       case sdn: SubscriptionDeveloperNotification => Right(sdn)
@@ -45,7 +61,7 @@ class MessageRouter(googleHTTPClient: GoogleHTTPClient,
     })
   }
 
-  def supportedSku(subscriptionDeveloperNotification: SubscriptionDeveloperNotification)
+  private def supportedSku(subscriptionDeveloperNotification: SubscriptionDeveloperNotification)
     : EitherT[Future, Exception, Contribution] = {
     EitherT(skuClient.getSkuType(subscriptionDeveloperNotification.subscriptionNotification.subscriptionId))
       .bimap(
@@ -60,7 +76,7 @@ class MessageRouter(googleHTTPClient: GoogleHTTPClient,
   }
 
   //todo: test notification types for refund
-  def checkNotificationType(contribution: Contribution): EitherT[Future, Exception, Contribution] = {
+  private def checkNotificationType(contribution: Contribution): EitherT[Future, Exception, Contribution] = {
     EitherT.fromEither[Future](
       contribution.subscriptionDeveloperNotification.subscriptionNotification.notificationType match {
         case NotificationType.SubscriptionPurchased => Right(contribution)
@@ -70,7 +86,7 @@ class MessageRouter(googleHTTPClient: GoogleHTTPClient,
       })
   }
 
-  def sendRequestToPaymentAPI(paymentRecord: PaymentRecord): EitherT[Future, Exception, Unit] = {
+  private def sendRequestToPaymentAPI(paymentRecord: PaymentRecord): EitherT[Future, Exception, Unit] = {
     val paymentResult = paymentRecord.status match {
       case Paid     => paymentClient.createPaymentRecord(paymentRecord)
       case Refunded => paymentClient.refundPaymentRecord(paymentRecord)
@@ -79,18 +95,21 @@ class MessageRouter(googleHTTPClient: GoogleHTTPClient,
     EitherT(
       paymentResult
         .map{ res =>
+          logger.info("Successfully sent to payment-api")
           monitoringService.addSendSuccessful()
           Right(res)
         }
         .recover {
           case e: Exception => {
+            //todo: Check how compliant this is - logging out customer emails???
+            logger.error(s"Failure to send to payment-api :: payment-record: $paymentRecord")
             monitoringService.addSendFailure()
             Left(e)
           }
         })
   }
 
-  def enrichWithSubscriptionPurchase(
+  private def enrichWithSubscriptionPurchase(
       contribution: Contribution): EitherT[Future, Exception, ContributionWithSubscriptionPurchase] = {
     EitherT(
       googleHTTPClient
@@ -107,7 +126,7 @@ class MessageRouter(googleHTTPClient: GoogleHTTPClient,
     )
   }
 
-  def createPaymentRecord(contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase)
+  private def createPaymentRecord(contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase)
     : EitherT[Future, Exception, PaymentRecord] = {
     val paymentRecord = (contributionWithSubscriptionPurchase,
                          contributionWithSubscriptionPurchase.subscriptionPurchase.emailAddress) match {
@@ -130,7 +149,7 @@ class MessageRouter(googleHTTPClient: GoogleHTTPClient,
     EitherT.fromEither[Future](paymentRecord)
   }
 
-  def createSingleContributionPaymentRecord(contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase)
+  private def createSingleContributionPaymentRecord(contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase)
     : Either[UnsupportedNotificationTypeException, PaymentRecord] = {
     (contributionWithSubscriptionPurchase.subscriptionDeveloperNotification.subscriptionNotification.notificationType,
      contributionWithSubscriptionPurchase.subscriptionPurchase.emailAddress) match {

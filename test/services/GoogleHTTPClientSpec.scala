@@ -15,13 +15,10 @@ import utils.MockWSHelper
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class GoogleHTTPClientSpec
-    extends WordSpecLike
-    with Matchers
-    with ScalaFutures
-    with MockWSHelper {
+class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures with MockWSHelper {
 
   class MockAccessTokenClient extends AccessTokenClient {
+
     def get() =
       Future.successful(
         GoogleAccessToken("someAccessToken", 1, "someScope", "someType")
@@ -33,7 +30,12 @@ class GoogleHTTPClientSpec
   "SKUs" must {
 
     val configuration =
-      Configuration.from(Map("google.packageName" -> "somePackageName"))
+      Configuration.from(
+        Map(
+          "google.packageName" -> "somePackageName",
+          "google.api-endpoint" -> "https://www.googleapis.com",
+          "google.account-endpoint" -> "https://www.account.google.com"
+        ))
 
     val timeout = Timeout(Span(500, Millis))
     val interval = Interval(Span(25, Millis))
@@ -62,25 +64,24 @@ class GoogleHTTPClientSpec
       val googleHttpClient =
         new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
-      whenReady(googleHttpClient.getSKU(SKUCode("skuCode")), timeout, interval) {
-        result =>
-          result shouldBe SKU(
-            "packageName",
-            SKUCode("skuCode"),
-            "status",
-            "subscription",
-            Price("2500000", "GBP"),
-            Map("GB" -> Price("2500000", "GBP")),
-            Map("en-GB" -> Listing("title", "description")),
-            "default language",
-            "P1M",
-            Season(
-              SeasonDate(1, 1),
-              SeasonDate(1, 1),
-              Some(List(Proration(SeasonDate(1, 1), Price("2500000", "GBP"))))
-            ),
-            "P5D"
-          )
+      whenReady(googleHttpClient.getSKU(SKUCode("skuCode")), timeout, interval) { result =>
+        result shouldBe SKU(
+          "packageName",
+          SKUCode("skuCode"),
+          "status",
+          "subscription",
+          Price("2500000", "GBP"),
+          Map("GB" -> Price("2500000", "GBP")),
+          Map("en-GB" -> Listing("title", "description")),
+          "default language",
+          "P1M",
+          Season(
+            SeasonDate(1, 1),
+            SeasonDate(1, 1),
+            Some(List(Proration(SeasonDate(1, 1), Price("2500000", "GBP"))))
+          ),
+          "P5D"
+        )
       }
     }
 
@@ -98,9 +99,8 @@ class GoogleHTTPClientSpec
       val googleHttpClient =
         new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
-      whenReady(googleHttpClient.getSKU(SKUCode("skuCode")) failed, timeout, interval) {
-        result =>
-          result shouldBe an[GoogleHTTPClientDeserializationException]
+      whenReady(googleHttpClient.getSKU(SKUCode("skuCode")) failed, timeout, interval) { result =>
+        result shouldBe an[GoogleHTTPClientDeserializationException]
       }
     }
 
@@ -136,6 +136,8 @@ class GoogleHTTPClientSpec
         "swg.clientId" -> "someClientId",
         "swg.clientSecret" -> "someClientSecret",
         "swg.redirectUri" -> "someRedirectUri",
+        "google.api-endpoint" -> "https://www.googleapis.com",
+        "google.account-endpoint" -> "https://www.account.google.com"
       )
     )
 

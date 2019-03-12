@@ -3,12 +3,15 @@ package controllers
 import fixtures.TestFixtures
 import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito._
-import org.mockito.{ Matchers => Match }
-import org.scalatest.{Matchers, WordSpecLike}
+import org.mockito.{Matchers => Match}
+import org.scalatest.{Matchers, TestData, WordSpecLike}
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.{FakeRequest, Injecting}
 import play.api.test.Helpers._
+import queue.SQSListenerImpl
 import services.MonitoringService
 
 
@@ -20,6 +23,9 @@ class PushHandlerFixture() extends MockitoSugar {
 
 class PushHandlerControllerSpec extends WordSpecLike with Matchers with GuiceOneAppPerTest with Injecting with MockitoSugar {
 
+  override def newAppForTest(td: TestData): Application = {
+    new GuiceApplicationBuilder().disable[SQSListenerImpl].build()
+  }
   "Push Handler" must {
     "handle a correctly formed post request with json data" in {
       val fixture = new PushHandlerFixture()

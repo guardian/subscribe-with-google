@@ -8,6 +8,7 @@ import scala.concurrent.duration._
 import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.Json
+import play.api.Logger._
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -22,12 +23,15 @@ class GoogleAccessTokenClient @Inject()(
     config: Configuration
 )(implicit executionContext: ExecutionContext)
     extends AccessTokenClient {
-  private val apiTokenUrl = "https://accounts.google.com/o/oauth2/token"
 
   private val refreshToken = config.get[String]("google.playDeveloperRefreshToken")
   private val swgClientId = config.get[String]("swg.clientId")
   private val swgClientSecret = config.get[String]("swg.clientSecret")
   private val swgRedirectUri = config.get[String]("swg.redirectUri")
+
+  private val googleAccountEndpoint = config.get[String]("google.account-endpoint")
+
+  private val apiTokenUrl = s"$googleAccountEndpoint/o/oauth2/token"
 
   private val cache: AsyncLoadingCache[String, GoogleAccessToken] =
     Scaffeine()
@@ -59,6 +63,8 @@ class GoogleAccessTokenClient @Inject()(
       .get() map { response =>
       {
         if (response.status != Status.OK) {
+          logger.error(
+            s"Failure to retrieve correct response when calling $apiTokenUrl with params: $params: Response code ${response.status} with body : ${response.body}")
           throw GoogleHTTPClientException(response.status, "Server error")
         } else {
           Json.parse(response.body).validate[GoogleAccessToken].asEither match {

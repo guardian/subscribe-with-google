@@ -25,7 +25,7 @@ class MessageRouterFixture extends MockitoSugar {
   val mockMonitoringService = mock[MonitoringService]
 
   val messageRouter =
-    new MessageRouter(mockGoogleHttpClient, mockPaymentApiClient, mockSkuClient, mockMonitoringService)
+    new MessageRouterImpl(mockGoogleHttpClient, mockPaymentApiClient, mockSkuClient, mockMonitoringService)
 
   val testNotification = new TestNotification("1.0")
   val testDeveloperNotification = TestDeveloperNotification("1.0", "org.gu", 1234l, testNotification)
