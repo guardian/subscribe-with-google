@@ -10,5 +10,3 @@ GET     /entitlements               controllers.AuthorizationController.entitlem
 
 GET     /pingback                   controllers.StatusController.ping
 GET     /healthcheck                controllers.StatusController.healthcheck
-
-POST    /push/handle-message        controllers.PushHandlerController.receivePush
