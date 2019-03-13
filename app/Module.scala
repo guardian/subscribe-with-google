@@ -21,7 +21,7 @@ class Module(env: Environment, configuration: Configuration) extends AbstractMod
         .to(classOf[SKUClientImpl])
 
     bind(classOf[SQSListener])
-      .to(classOf[SQSListenerImpl])
+      .to(classOf[SQSListenerImpl]).asEagerSingleton()
 
     bind(classOf[AmazonCloudWatch])
       .toInstance(AWSClientBuilder.buildCloudWatchAsyncClient())
