@@ -23,7 +23,14 @@ case class SubscriptionPurchase(kind: String,
                                 emailAddress: Option[String],
                                 givenName: String,
                                 familyName: String,
-                                profileId: String)
+                                profileId: String) {
+
+  /*
+   * Price is expressed in micro-units, where 1,000,000 micro-units represents one unit of the currency.
+   * For example, if the subscription price is €1.99, priceAmountMicros is 1990000.
+   */
+  val priceAmount: Double = priceAmountMicros / 1000000
+}
 
 object CancelSurveyResult {
   implicit val format = Json.format[CancelSurveyResult]
