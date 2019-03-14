@@ -6,7 +6,6 @@ import akka.stream.Materializer
 import akka.stream.alpakka.sqs.{MessageAction, SqsSourceSettings}
 import akka.stream.alpakka.sqs.scaladsl.{SqsAckSink, SqsSource}
 import akka.stream.scaladsl.{Flow, Keep, RestartSource, Sink, Source}
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.sqs.model.{Message, QueueDoesNotExistException}
 import com.amazonaws.services.sqs.{AmazonSQSAsync, AmazonSQSAsyncClientBuilder}
@@ -31,15 +30,14 @@ trait SQSListener
 class SQSListenerImpl @Inject()(messageRouter: MessageRouter, credentialProvider: CredentialProvider)(implicit system: ActorSystem, materializer: Materializer)
     extends SQSListener {
 
-  logger.info("Starting up SQS Consumer")
 
   val config = ConfigFactory.load()
 
   val queueUrl = config.getString("sqs.queue-url")
   val sqsRegion = config.getString("sqs.region")
-  val sqsSecretKey = config.getString("sqs.secret-key")
-  val sqsAccessKey = config.getString("sqs.access-key")
 
+
+  logger.info(s"Starting up SQS Consumer for : $queueUrl")
 
   implicit val awsSqsClient: AmazonSQSAsync = AmazonSQSAsyncClientBuilder
     .standard()
