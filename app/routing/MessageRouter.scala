@@ -177,6 +177,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
       case JsSuccess(value, _) => Right(value)
       case JsError(errors) =>
         monitoringService.addDeserializationFailure()
+        logger.error(s"Failure to deserialize push request from pub sub :: $errors")
         Left(DeserializationException("Failure to deserialize push request from pub sub", errors))
     })
   }

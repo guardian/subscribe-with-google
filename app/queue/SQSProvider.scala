@@ -69,8 +69,7 @@ class SQSListenerImpl @Inject()(messageRouter: MessageRouter,
 
   private def handleMessage(message: Message) = {
     val parseMessage = () => {
-      val messageBody = Json.parse(message.getBody)
-      messageBody("body")
+      Json.parse(message.getBody)
         .validate[GooglePushMessageWrapper]
         .asEither
         .leftMap { errs =>
