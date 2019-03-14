@@ -110,6 +110,18 @@ Resources:
                   - autoscaling:DescribeAutoScalingInstances
                   - autoscaling:DescribeAutoScalingGroups
                 Resource: "*"
+        - PolicyName: SqsMessages
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:ChangeMessageVisibility
+                  - sqs:GetQueueUrl
+                  - sqs:SendMessage
+                  - sqs:DeleteMessage
+                Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:google-pub-sub-queue-${Stage}
 
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
