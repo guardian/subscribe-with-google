@@ -116,11 +116,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - sqs:ReceiveMessage
-                  - sqs:ChangeMessageVisibility
-                  - sqs:GetQueueUrl
-                  - sqs:SendMessage
-                  - sqs:DeleteMessage
+                  - sqs:*
                 Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:google-pub-sub-queue-${Stage}
 
   InstanceProfile:
