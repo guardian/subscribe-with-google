@@ -50,7 +50,7 @@ class GoogleHTTPClient @Inject()(
       .get() map { response =>
       {
         if (response.status != Status.OK) {
-          throw GoogleHTTPClientException(response.status, "Server error")
+          throw GoogleHTTPClientException(response.status, s"Attempt to connect to $url - Received status ${response.status}")
         } else {
           Json.parse(response.body).validate[A].asEither match {
             case Left(l) =>
