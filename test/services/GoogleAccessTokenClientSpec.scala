@@ -37,7 +37,7 @@ class GoogleAccessTokenClientSpec
 
     "Retrieve and deserialise an Access Token" in {
       val ws = MockWS {
-        case (GET, "https://accounts.google.com/o/oauth2/token") =>
+        case (POST, "https://accounts.google.com/o/oauth2/token") =>
           Action {
             Ok(s"""{
                   |"access_token": "someAccessToken",
@@ -58,7 +58,7 @@ class GoogleAccessTokenClientSpec
 
     "Subsequent retrieval uses cache" in {
       val route = Route {
-        case (GET, "https://accounts.google.com/o/oauth2/token") =>
+        case (POST, "https://accounts.google.com/o/oauth2/token") =>
           Action {
             Ok(s"""{
                   |"access_token": "someAccessToken",
@@ -83,7 +83,7 @@ class GoogleAccessTokenClientSpec
 
     "Fail with invalid JSON" in {
       val ws = MockWS {
-        case (GET, "https://accounts.google.com/o/oauth2/token") =>
+        case (POST, "https://accounts.google.com/o/oauth2/token") =>
           Action {
             Ok(s"""{
                   |"access_token": "someAccessToken"
@@ -102,7 +102,7 @@ class GoogleAccessTokenClientSpec
 
     "Fail if HTTP request fails" in {
       val ws = MockWS {
-        case (GET, "https://accounts.google.com/o/oauth2/token") =>
+        case (POST, "https://accounts.google.com/o/oauth2/token") =>
           Action {
             InternalServerError("Some Server Error")
           }

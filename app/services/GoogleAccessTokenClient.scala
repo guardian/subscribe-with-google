@@ -49,7 +49,7 @@ class GoogleAccessTokenClient @Inject()(
   def get(): Future[GoogleAccessToken] = cache.get("accessToken")
 
   private def getAccessTokenRequest(): Future[GoogleAccessToken] = {
-    val params = Seq(
+    val params = Map(
       "grant_type" -> "refresh_token",
       "refresh_token" -> refreshToken,
       "client_id" -> swgClientId,
@@ -59,8 +59,7 @@ class GoogleAccessTokenClient @Inject()(
 
     wsClient
       .url(apiTokenUrl)
-      .withQueryStringParameters(params: _*)
-      .get() map { response =>
+      .post(params) map { response =>
       {
         if (response.status != Status.OK) {
           logger.error(
