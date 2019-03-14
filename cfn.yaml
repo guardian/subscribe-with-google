@@ -119,6 +119,16 @@ Resources:
                   - sqs:*
                 Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:google-pub-sub-queue-${Stage}
 
+        - PolicyName: PushMetrics
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudwatch:PutMetricData
+                Resource: '*'
+
+
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
