@@ -2,7 +2,7 @@ package config
 
 import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import com.typesafe.config.ConfigFactory
+import play.api.Configuration
 
 trait CredentialProvider {
 
@@ -12,16 +12,12 @@ trait CredentialProvider {
 
 
 
-class CredentialProviderImpl(stage: String) extends CredentialProvider {
+class CredentialProviderImpl(stage: String, configuration: Configuration) extends CredentialProvider {
 
   override def credentialProvider: AWSCredentialsProvider = {
     if (stage == "DEV") {
-      val config = ConfigFactory.load()
-
-      val queueUrl = config.getString("sqs.queue-url")
-      val sqsRegion = config.getString("sqs.region")
-      val sqsSecretKey = config.getString("sqs.secret-key")
-      val sqsAccessKey = config.getString("sqs.access-key")
+      val sqsSecretKey = configuration.get[String]("sqs.secret-key")
+      val sqsAccessKey = configuration.get[String]("sqs.access-key")
 
       new AWSStaticCredentialsProvider(new BasicAWSCredentials(sqsAccessKey, sqsSecretKey))
     } else {
