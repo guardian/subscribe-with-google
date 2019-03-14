@@ -11,6 +11,7 @@ import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.sqs.model.{Message, QueueDoesNotExistException}
 import com.amazonaws.services.sqs.{AmazonSQSAsync, AmazonSQSAsyncClientBuilder}
 import com.typesafe.config.ConfigFactory
+import config.CredentialProvider
 import exceptions.DeserializationException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -27,7 +28,7 @@ import scala.concurrent.duration._
 trait SQSListener
 
 @Singleton
-class SQSListenerImpl @Inject()(messageRouter: MessageRouter)(implicit system: ActorSystem, materializer: Materializer)
+class SQSListenerImpl @Inject()(messageRouter: MessageRouter, credentialProvider: CredentialProvider)(implicit system: ActorSystem, materializer: Materializer)
     extends SQSListener {
 
   logger.info("Starting up SQS Consumer")
@@ -39,11 +40,10 @@ class SQSListenerImpl @Inject()(messageRouter: MessageRouter)(implicit system: A
   val sqsSecretKey = config.getString("sqs.secret-key")
   val sqsAccessKey = config.getString("sqs.access-key")
 
-  val credentialsProvider = new AWSStaticCredentialsProvider(new BasicAWSCredentials(sqsAccessKey, sqsSecretKey))
 
   implicit val awsSqsClient: AmazonSQSAsync = AmazonSQSAsyncClientBuilder
     .standard()
-    .withCredentials(credentialsProvider)
+    .withCredentials(credentialProvider.credentialProvider)
     .withEndpointConfiguration(new EndpointConfiguration(queueUrl, sqsRegion))
     .build()
 
