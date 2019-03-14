@@ -26,7 +26,7 @@ class Module(env: Environment, configuration: Configuration) extends AbstractMod
         .to(classOf[SKUClientImpl])
 
     bind(classOf[CredentialProvider])
-        .toInstance(new CredentialProviderImpl(stage))
+        .toInstance(new CredentialProviderImpl(stage, configuration))
 
     bind(classOf[SQSListener])
       .to(classOf[SQSListenerImpl]).asEagerSingleton()
