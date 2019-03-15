@@ -38,16 +38,6 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
       paymentRequest <- sendRequestToPaymentAPI(paymentRecord)
     } yield paymentRequest
 
-    exceptionOrNotification.value.map{
-      case Left(e: IgnorableException) =>
-        logger.info(s"Ignorable exception encountered ${e.getMessage}")
-        Left(e)
-      case Left(e) =>
-        logger.error("Failure to complete payment :: This is a recoverable error - placing message back on queue", e)
-        Left(e)
-      case Right(u) => Right(u)
-    }
-
     exceptionOrNotification.value
   }
 
