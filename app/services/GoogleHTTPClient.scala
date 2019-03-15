@@ -46,7 +46,7 @@ class GoogleHTTPClient @Inject()(
   def getRequestWithAccessToken[A: Reads](wsClient: WSClient, url: String, accessToken: String): Future[A] = {
     wsClient
       .url(url)
-      .addHttpHeaders("Authorization" -> accessToken)
+      .addHttpHeaders("Authorization" -> s"Bearer $accessToken")
       .get() map { response =>
       {
         if (response.status != Status.OK) {
