@@ -153,16 +153,16 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
           Action {
             Ok(s"""{
                   |"kind": "androidpublisher#subscriptionPurchase",
-                  |"startTimeMillis": 1,
-                  |"expiryTimeMillis": 1,
+                  |"startTimeMillis": "1",
+                  |"expiryTimeMillis": "1",
                   |"autoRenewing": true,
                   |"priceCurrencyCode": "GBP",
-                  |"priceAmountMicros": 1,
-                  |"countryCode": "en-GB",
+                  |"priceAmountMicros": "1990000",
+                  |"countryCode": "GB",
                   |"developerPayload": "devPayload",
                   |"paymentState": 1,
                   |"cancelReason": 1,
-                  |"userCancellationTimeMillis": 1,
+                  |"userCancellationTimeMillis": "1",
                   |"cancelSurveyResult": {
                   | "cancelSurveyReason": 1,
                   | "userInputCancelReason": "reason"
@@ -182,9 +182,11 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
       val googleHttpClient =
         new GoogleHTTPClient(ws, mockAccessTokenClient, configuration)
 
+      val eventualPurchase = googleHttpClient
+      .getSubscriptionPurchase(SKUCode("someProductId"), "somePurchaseToken")
+
       whenReady(
-        googleHttpClient
-          .getSubscriptionPurchase(SKUCode("someProductId"), "somePurchaseToken"),
+        eventualPurchase,
         timeout,
         interval
       ) { result =>
@@ -194,8 +196,8 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
           "1",
           Some(true),
           "GBP",
-          "1",
-          "en-GB",
+          "1990000",
+          "GB",
           "devPayload",
           1,
           1,
@@ -211,6 +213,12 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
           Some("profileId"),
         )
       }
+
+      whenReady(
+        eventualPurchase,
+        timeout,
+        interval
+      )( result => result.priceAmount shouldBe BigDecimal(1.99))
     }
 
     "Fail with invalid JSON" in {
