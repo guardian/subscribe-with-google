@@ -12,6 +12,7 @@ import routing.adt._
 import services.{GoogleHTTPClient, MonitoringService, PaymentHTTPClient, SKUClient}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 trait MessageRouter {
   def handleMessage(message: () => Either[Exception, GooglePushMessageWrapper]): Future[Either[Exception, Unit]]
@@ -29,7 +30,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
 
     val exceptionOrNotification = for {
       wrapper <- googlePushMessageWrapper
-      developerNotification <- parsePushMessageBody[DeveloperNotification](Json.parse(wrapper.message.decodedData))
+      developerNotification <- parsePushMessageBody[DeveloperNotification](wrapper.message.decodedData)
       subscriptionDeveloperNotification <- convertToSubscriptionDeveloperNotification(developerNotification)
       contributionWithType <- supportedSku(subscriptionDeveloperNotification)
       supportedNotificationType <- checkNotificationType(contributionWithType)
@@ -162,13 +163,31 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
     }
   }
 
-  private def parsePushMessageBody[A: Reads](json: JsValue): EitherT[Future, Exception, A] = {
-    EitherT.fromEither[Future](json.validate[A] match {
-      case JsSuccess(value, _) => Right(value)
-      case JsError(errors) =>
-        monitoringService.addDeserializationFailure()
-        logger.error(s"Failure to deserialize push request from pub sub :: $errors")
-        Left(DeserializationException("Failure to deserialize push request from pub sub", errors))
-    })
+  private def parsePushMessageBody[A: Reads](jsonStr: String): EitherT[Future, Exception, A] = {
+
+    def validateJson[A: Reads](json: JsValue): Either[DeserializationException, A] = {
+      json.validate[A] match {
+        case JsSuccess(value, _) => Right(value)
+        case JsError(errors) =>
+          monitoringService.addDeserializationFailure()
+          logger.error(s"Failure to deserialize push request from pub sub :: $errors")
+          Left(DeserializationException("Failure to deserialize push request from pub sub", errors))
+      }
+    }
+
+    val attemptedParse = Try(Json.parse(jsonStr)).toEither.leftMap(l => {
+        val exception = DeserializationException(
+          s"Failure to deserialize push request from pub sub : Received Notification containing $jsonStr")
+        logger.error(exception.message, l)
+        exception
+      })
+
+    val validatedJson = for {
+      jsonVal <- attemptedParse
+      validatedJsVal <- validateJson(jsonVal)
+    } yield validatedJsVal
+
+    EitherT.fromEither[Future](validatedJson)
+
   }
 }

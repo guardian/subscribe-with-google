@@ -152,6 +152,20 @@ class MessageRouterFixture extends MockitoSugar {
 class MessageRouterSpec extends WordSpecLike with Matchers with MockitoSugar with ScalaFutures {
 
   "Message router" must {
+    "fail gracefully when data field is populated with non-json" in {
+      val fixture = new MessageRouterFixture()
+
+      val currentPushMessage = GooglePushMessage(None, "c2hhYmFhYWFh", "whatmessageId", "notime")
+
+      val testWrapper: Either[Exception, GooglePushMessageWrapper] =
+        Right(GooglePushMessageWrapper(message = currentPushMessage, subscription = "helloworld"))
+
+      val result = fixture.messageRouter.handleMessage(() => testWrapper)
+
+      result.futureValue.left.get shouldBe DeserializationException("Failure to deserialize push request from pub sub : Received Notification containing shabaaaaa")
+
+    }
+
     "stop processing when message is not deserializable" in {
       val fixture = new MessageRouterFixture()
 

@@ -67,6 +67,7 @@ class SQSListenerImpl @Inject()(messageRouter: MessageRouter,
       30 seconds,
       0.2
     ) { () =>
+      logger.info("Starting up SQS Stream")
       Source.fromFuture(graph.run())
     }
     .runWith(Sink.ignore)
