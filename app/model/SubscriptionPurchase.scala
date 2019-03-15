@@ -7,16 +7,16 @@ import play.api.libs.json.Json
 case class CancelSurveyResult(cancelSurveyReason: Double, userInputCancelReason: String)
 
 case class SubscriptionPurchase(kind: String,
-                                startTimeMillis: Long,
-                                expiryTimeMillis: Double,
+                                startTimeMillis: String,
+                                expiryTimeMillis: String,
                                 autoRenewing: Option[Boolean],
                                 priceCurrencyCode: String,
-                                priceAmountMicros: Double,
+                                priceAmountMicros: String,
                                 countryCode: String,
                                 developerPayload: String,
                                 paymentState: Double,
                                 cancelReason: Double,
-                                userCancellationTimeMillis: Option[Double],
+                                userCancellationTimeMillis: Option[String],
                                 cancelSurveyResult: Option[CancelSurveyResult],
                                 orderId: String,
                                 linkedPurchaseToken: Option[String],
@@ -31,7 +31,7 @@ case class SubscriptionPurchase(kind: String,
    * Price is expressed in micro-units, where 1,000,000 micro-units represents one unit of the currency.
    * For example, if the subscription price is €1.99, priceAmountMicros is 1990000.
    */
-  val priceAmount: Double = priceAmountMicros / 1000000
+  val priceAmount: BigDecimal = BigDecimal(priceAmountMicros) / 1000000
 
 
   val customerNameOpt: Option[String] = Semigroup[Option[String]].combine(givenName.map(str => str + " "), familyName)
