@@ -200,7 +200,7 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
           "GB",
           "devPayload",
           1,
-          1,
+          Some(1),
           Some("1"),
           Some(CancelSurveyResult(1, "reason")),
           "orderId",
