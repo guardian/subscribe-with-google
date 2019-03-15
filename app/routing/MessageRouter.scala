@@ -38,16 +38,6 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
       paymentRequest <- sendRequestToPaymentAPI(paymentRecord)
     } yield paymentRequest
 
-    exceptionOrNotification.value.map{
-      case Left(e: IgnorableException) =>
-        logger.info(s"Ignorable exception encountered ${e.getMessage}")
-        Left(e)
-      case Left(e) =>
-        logger.error("Failure to complete payment :: This is a recoverable error - placing message back on queue", e)
-        Left(e)
-      case Right(u) => Right(u)
-    }
-
     exceptionOrNotification.value
   }
 
@@ -160,10 +150,10 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
             purchaseData.customerNameOpt.getOrElse(""),
             email,
             Paid,
-            purchaseData.priceAmountMicros,
+            purchaseData.priceAmount,
             purchaseData.priceCurrencyCode,
             purchaseData.countryCode,
-            PaymentRecord.generatePaymentId(purchaseData),
+            purchaseData.orderId,
             System.currentTimeMillis()
           )
         )
@@ -177,6 +167,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
       case JsSuccess(value, _) => Right(value)
       case JsError(errors) =>
         monitoringService.addDeserializationFailure()
+        logger.error(s"Failure to deserialize push request from pub sub :: $errors")
         Left(DeserializationException("Failure to deserialize push request from pub sub", errors))
     })
   }

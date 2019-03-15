@@ -23,7 +23,6 @@ Parameters:
   AMI:
     Description: AMI ID
     Type: String
-    Default: ami-021e99cf3f971f8b0
   OfficeCIDR:
     Description: Office IP range
     Type: String
@@ -111,6 +110,24 @@ Resources:
                   - autoscaling:DescribeAutoScalingInstances
                   - autoscaling:DescribeAutoScalingGroups
                 Resource: "*"
+        - PolicyName: SqsMessages
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:*
+                Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:google-pub-sub-queue-${Stage}
+
+        - PolicyName: PushMetrics
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudwatch:PutMetricData
+                Resource: '*'
+
 
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile

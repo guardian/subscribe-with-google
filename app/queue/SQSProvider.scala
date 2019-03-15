@@ -6,44 +6,41 @@ import akka.stream.Materializer
 import akka.stream.alpakka.sqs.{MessageAction, SqsSourceSettings}
 import akka.stream.alpakka.sqs.scaladsl.{SqsAckSink, SqsSource}
 import akka.stream.scaladsl.{Flow, Keep, RestartSource, Sink, Source}
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.sqs.model.{Message, QueueDoesNotExistException}
 import com.amazonaws.services.sqs.{AmazonSQSAsync, AmazonSQSAsyncClientBuilder}
-import com.typesafe.config.ConfigFactory
-import exceptions.DeserializationException
+import config.CredentialProvider
+import exceptions.{DeserializationException, IgnorableException}
 import javax.inject.Inject
 import javax.inject.Singleton
 import model.GooglePushMessageWrapper
+import play.api.Configuration
 import play.api.Logger._
 import play.api.libs.json.Json
 import routing.MessageRouter
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Future
 import scala.concurrent.duration._
-
-
 
 trait SQSListener
 
 @Singleton
-class SQSListenerImpl @Inject()(messageRouter: MessageRouter)(implicit system: ActorSystem, materializer: Materializer)
+class SQSListenerImpl @Inject()(messageRouter: MessageRouter,
+                                credentialProvider: CredentialProvider,
+                                config: Configuration)(implicit system: ActorSystem, materializer: Materializer)
     extends SQSListener {
 
-  logger.info("Starting up SQS Consumer")
+  private implicit val ec = system.dispatcher
 
-  val config = ConfigFactory.load()
+  private val queueUrl = config.get[String]("sqs.queue-url")
+  private val sqsRegion = config.get[String]("sqs.region")
 
-  val queueUrl = config.getString("sqs.queue-url")
-  val sqsRegion = config.getString("sqs.region")
-  val sqsSecretKey = config.getString("sqs.secret-key")
-  val sqsAccessKey = config.getString("sqs.access-key")
-
-  val credentialsProvider = new AWSStaticCredentialsProvider(new BasicAWSCredentials(sqsAccessKey, sqsSecretKey))
+  logger.info(s"Starting up SQS Consumer for : $queueUrl")
 
   implicit val awsSqsClient: AmazonSQSAsync = AmazonSQSAsyncClientBuilder
     .standard()
-    .withCredentials(credentialsProvider)
+    .withCredentials(credentialProvider.credentialProvider)
     .withEndpointConfiguration(new EndpointConfiguration(queueUrl, sqsRegion))
     .build()
 
@@ -61,6 +58,7 @@ class SQSListenerImpl @Inject()(messageRouter: MessageRouter)(implicit system: A
       f
     })
     .via(Flow.fromFunction(handleMessage))
+    .mapAsync(1)(f => f)
     .toMat(sink)(Keep.right)
 
   RestartSource
@@ -73,18 +71,26 @@ class SQSListenerImpl @Inject()(messageRouter: MessageRouter)(implicit system: A
     }
     .runWith(Sink.ignore)
 
-  private def handleMessage(message: Message) = {
+  private def handleMessage(message: Message): Future[MessageAction] = {
     val parseMessage = () => {
-      val messageBody = Json.parse(message.getBody)
-      messageBody("body")
-        .validate[GooglePushMessageWrapper].asEither.leftMap { errs =>
-        DeserializationException(s"Unable to deserialize GooglePushMessage :: ${message.getBody}", errs)
-      }
+      Json.parse(message.getBody)
+        .validate[GooglePushMessageWrapper]
+        .asEither
+        .leftMap { errs =>
+          DeserializationException(s"Unable to deserialize GooglePushMessage :: ${message.getBody}", errs)
+        }
     }
 
-    messageRouter.handleMessage(parseMessage)
-
-    MessageAction.Delete(message)
+    messageRouter.handleMessage(parseMessage).map{
+      case Left(e: IgnorableException) =>
+        logger.info(s"Ignorable exception encountered ${e.getMessage}")
+        MessageAction.Delete(message)
+      case Left(e) =>
+        logger.error("Failure to complete payment :: This is a recoverable error - placing message back on queue", e)
+        MessageAction.Ignore(message)
+      case Right(_) =>
+        MessageAction.Delete(message)
+    }
   }
 
   private def queueExists(queueUrl: String): Unit = {

@@ -121,7 +121,7 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
       whenReady(googleHttpClient.getSKU(SKUCode("skuCode")) failed) { result =>
         result shouldBe GoogleHTTPClientException(
           INTERNAL_SERVER_ERROR,
-          "Server error"
+          "Attempt to connect to https://www.googleapis.com/androidpublisher/v3/applications/somePackageName/inappproducts/skuCode - Received status 500"
         )
       }
     }
@@ -192,18 +192,18 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
           "androidpublisher#subscriptionPurchase",
           1,
           1,
-          true,
+          Some(true),
           "GBP",
           1,
           "en-GB",
           "devPayload",
           1,
           1,
-          1,
-          CancelSurveyResult(1, "reason"),
+          Some(1),
+          Some(CancelSurveyResult(1, "reason")),
           "orderId",
-          "linkedPurchaseToken",
-          1,
+          Some("linkedPurchaseToken"),
+          Some(1),
           Some("profileName"),
           Some("email"),
           Some("givenName"),
@@ -257,7 +257,7 @@ class GoogleHTTPClientSpec extends WordSpecLike with Matchers with ScalaFutures 
       ) { result =>
         result shouldBe GoogleHTTPClientException(
           INTERNAL_SERVER_ERROR,
-          "Server error"
+          "Attempt to connect to https://www.googleapis.com/androidpublisher/v3/applications/somePackageName/purchases/subscriptions/someProductId/tokens/somePurchaseToken - Received status 500"
         )
       }
     }
