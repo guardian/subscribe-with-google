@@ -147,13 +147,13 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
         val purchaseData = contributionWithSubscriptionPurchase.subscriptionPurchase
         Right(
           PaymentRecord(
-            purchaseData.givenName,
+            purchaseData.customerNameOpt.getOrElse(""),
             email,
             Paid,
             purchaseData.priceAmount,
             purchaseData.priceCurrencyCode,
             purchaseData.countryCode,
-            PaymentRecord.generatePaymentId(purchaseData),
+            purchaseData.orderId,
             System.currentTimeMillis()
           )
         )
