@@ -71,6 +71,7 @@ Resources:
             export INSTANCE_ID=$(hostname -i)
             dpkg -i /tmp/${App}_1.0_all.deb
             subscribe-with-google
+            /opt/cloudwatch-logs/configure-logs application ${Stack} ${Stage} ${App} /var/log/${App}/application.log
 
   AppRole:
     Type: AWS::IAM::Role
@@ -127,6 +128,16 @@ Resources:
                 Action:
                   - cloudwatch:PutMetricData
                 Resource: '*'
+        - PolicyName: CloudwatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt SubscribeWithGoogleLogGroup.Arn
 
 
   InstanceProfile:
@@ -221,3 +232,10 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
+
+  SubscribeWithGoogleLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub ${Stack}-${App}-${Stage}
+      RetentionInDays: 14
+
