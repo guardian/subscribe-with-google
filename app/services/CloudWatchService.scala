@@ -7,7 +7,7 @@ import play.api.Logger._
 
 trait MonitoringService {
 
-  def put(metricName: String): Unit
+  def put(metricName: String, dimensionName: String): Unit
 
   def put(metricName: String, dimensionName: String, metricValue: String): Unit
 
@@ -39,11 +39,17 @@ trait MonitoringService {
 class CloudWatchService(cloudWatchAsyncClient: AmazonCloudWatchAsync, qualifier: String) extends MonitoringService {
   private val namespace = s"support-subscribe-with-google-$qualifier"
 
-  def put(metricName: String): Unit = {
+  def put(metricName: String, dimensionName: String): Unit = {
+    val dimension = new Dimension()
+      .withName(dimensionName)
+      .withValue(metricName)
+
+
     val metric = new MetricDatum()
       .withValue(1d)
       .withMetricName(metricName)
       .withUnit("Count")
+      .withDimensions(dimension)
 
     val request = new PutMetricDataRequest()
       .withNamespace(namespace)
@@ -75,17 +81,17 @@ class CloudWatchService(cloudWatchAsyncClient: AmazonCloudWatchAsync, qualifier:
   }
 
   def addDeserializationFailure(): Unit = {
-    put("IncomingPubSubDeserialization")
+    put("IncomingPubSubDeserializationFailure", "Retryable")
   }
-  override def addMessageReceived(): Unit = put("MessageReceived")
-  override def addSendSuccessful(): Unit = put("PaymentAPIRecordSuccess")
-  override def addSendFailure(): Unit = put("PaymentAPIRecordFailure")
-  override def addUnsupportedPaymentType(): Unit = put("UnsupportedPaymentType")
-  override def addUnsupportedNotificationType(): Unit = put("UnsupportedNotificationType")
-  override def addReceivedTestNotification(): Unit = put("ReceivedTestNotification")
-  override def addUnsupportedSKU(): Unit = put("UnsupportedSKU")
-  override def addFailureToGetSubscriptionPurchase(): Unit = put("FailureToGetSubscriptionPurchase")
-  override def addUnsupportedPlatformPurchase(): Unit = put("UnsupportedPlatformPurchase")
+  override def addMessageReceived(): Unit = put("MessageReceived", "PubSubReceive")
+  override def addSendSuccessful(): Unit = put("PaymentAPIRecordSuccess", "Success")
+  override def addSendFailure(): Unit = put("PaymentAPIRecordFailure", "Retryable")
+  override def addUnsupportedPaymentType(): Unit = put("UnsupportedPaymentType", "IgnorableMessage")
+  override def addUnsupportedNotificationType(): Unit = put("UnsupportedNotificationType", "IgnorableMessage")
+  override def addReceivedTestNotification(): Unit = put("ReceivedTestNotification", "IgnorableMessage")
+  override def addUnsupportedSKU(): Unit = put("UnsupportedSKU", "Retryable")
+  override def addFailureToGetSubscriptionPurchase(): Unit = put("FailureToGetSubscriptionPurchase","Retryable")
+  override def addUnsupportedPlatformPurchase(): Unit = put("UnsupportedPlatformPurchase", "IgnorableMessage")
 }
 
 object CloudWatchService {
