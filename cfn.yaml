@@ -239,3 +239,43 @@ Resources:
       LogGroupName: !Sub ${Stack}-${App}-${Stage}
       RetentionInDays: 14
 
+#  NoHealthyInstancesAlarm:
+#    Type: AWS::CloudWatch::Alarm
+#    Properties:
+#      AlarmActions:
+#        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:contributions-dev
+#      AlarmName: !Sub No healthy instances for ${App} in ${Stage}
+#      MetricName: HealthyHostCount
+#      Namespace: AWS/ApplicationELB
+#      Dimensions:
+#        - Name: LoadBalancer
+#          Value: !GetAtt ElasticLoadBalancer.LoadBalancerFullName
+#        - Name: TargetGroup
+#          Value: !GetAtt TargetGroup.TargetGroupFullName
+#      ComparisonOperator: LessThanOrEqualToThreshold
+#      Threshold: 0.5
+#      Period: 60
+#      EvaluationPeriods: 2
+#      Statistic: Average
+#    DependsOn:
+#      - TargetGroup
+#      - ElasticLoadBalancer
+#
+#  NoMessagesReceivedInTheLastDay:
+#    Type: AWS::CloudWatch::Alarm
+#    Properties:
+#      AlarmActions:
+#        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-24-7
+#      AlarmName: !Sub ${App} ${Stage} Subscribe With Google message stream is silent
+#      AlarmDescription: There have been ZERO received messages in the last 24 hours
+#      MetricName: MessageReceived
+#      Namespace: support-subscribe-with-google-CODE
+#      Dimensions:
+#        - Name: PubSubReceive
+#          Value: MessageReceived
+#      ComparisonOperator: LessThanOrEqualToThreshold
+#      Threshold: 0
+#      Period: 3600
+#      EvaluationPeriods: 24
+#      Statistic: Sum
+#      TreatMissingData: breaching
