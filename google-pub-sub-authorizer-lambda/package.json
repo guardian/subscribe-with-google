@@ -1,6 +1,6 @@
 {
   "name": "google-pub-sub-authorizer",
-  "description": "Authorizor for Google Pub Sub API. Currently used by Subscribe with Google",
+  "description": "Authorizer for Google Pub Sub API. Currently used by Subscribe with Google",
   "repository": "https://github.com/guardian/subscribe-with-google",
   "version": "1.0.0",
   "private": true,
