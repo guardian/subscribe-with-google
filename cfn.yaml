@@ -30,6 +30,7 @@ Parameters:
   CertificateARN:
     Description: SSL Certificate
     Type: String
+    Default: arn:aws:acm:eu-west-1:865473395570:certificate/c16b178b-c97c-4d34-9ee7-f000abfccf39
 
 Resources:
   AutoScalingGroup:
