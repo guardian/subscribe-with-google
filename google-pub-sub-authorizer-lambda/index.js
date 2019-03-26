@@ -1,22 +1,23 @@
-function generatePolicy(effect, resource) {
+function generatePolicy(resource, principalId) {
     return {
-        principalId: 'user',
+        principalId: principalId,
         policyDocument: {
             Version: '2012-10-17',
             Statement: [{
                 Action: 'execute-api:Invoke',
-                Effect: effect,
+                Effect: 'Allow',
                 Resource: resource
             }]
         }
     };
 }
 
-exports.handler = (event, context, cb) => {
+exports.handler = (event, context, callback) => {
     const secret = event.queryStringParameters.secret;
-    if (secret == process.env.SECRET_KEY) {
-        cb(null, generatePolicy('Allow', event.methodArn));
+    
+    if (secret !== process.env.SECRET_KEY) {
+        callback('Invalid secret');
     } else {
-        cb(null, generatePolicy('Deny', event.methodArn));
+        callback(null, generatePolicy(event.methodArn, secret));
     }
-}
+};

@@ -109,14 +109,13 @@ Resources:
     Type: AWS::ApiGateway::Method
     DependsOn: SQSQueue
     Properties:
-      RestApiId: !Ref "MessageApi"
-      ResourceId: !Ref "MessageResource"
+      RestApiId: !Ref MessageApi
+      ResourceId: !Ref MessageResource
       HttpMethod: POST
       MethodResponses:
         - StatusCode: 200
       AuthorizationType: CUSTOM
-      # TODO fix authorization
-      # AuthorizerId: !Ref MessageApiAuthorizer
+      AuthorizerId: !Ref MessageApiAuthorizer
       Integration:
         Type: AWS
         Uri: !Sub "arn:aws:apigateway:${AWS::Region}:sqs:path//${AWS::AccountId}/google-pub-sub-queue-${Stage}"
@@ -139,6 +138,7 @@ Resources:
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId: !Ref MessageApi
+    DependsOn: ReceiveMessageMethod
 
   MessageApiDomainName:
     Type: AWS::ApiGateway::DomainName
