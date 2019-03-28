@@ -31,11 +31,12 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
     val exceptionOrNotification = for {
       wrapper <- googlePushMessageWrapper
       developerNotification <- parsePushMessageBody[DeveloperNotification](wrapper.message.decodedData)
+      publishTime = developerNotification.eventTimeMillis
       subscriptionDeveloperNotification <- convertToSubscriptionDeveloperNotification(developerNotification)
       contributionWithType <- supportedSku(subscriptionDeveloperNotification)
       supportedNotificationType <- checkNotificationType(contributionWithType)
       enrichedContribution <- enrichWithSubscriptionPurchase(supportedNotificationType)
-      paymentRecord <- createPaymentRecord(enrichedContribution)
+      paymentRecord <- createPaymentRecord(enrichedContribution, publishTime)
       paymentRequest <- sendRequestToPaymentAPI(paymentRecord)
     } yield paymentRequest
 
@@ -117,7 +118,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
     )
   }
 
-  private def createPaymentRecord(contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase)
+  private def createPaymentRecord(contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase, publishTime: Long)
     : EitherT[Future, Exception, PaymentRecord] = {
     val paymentRecord = (contributionWithSubscriptionPurchase,
                          contributionWithSubscriptionPurchase.subscriptionPurchase.emailAddress) match {
@@ -126,7 +127,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
         Left(
           UnsupportedOffPlatformPurchaseException("Currently we do not support contributions without email addresses"))
       case (single: SingleContributionWithSubscriptionPurchase, Some(_)) =>
-        createSingleContributionPaymentRecord(single)
+        createSingleContributionPaymentRecord(single, publishTime)
       case (recurring: RecurringContributionWithSubscriptionPurchase, None) =>
         monitoringService.addUnsupportedPlatformPurchase()
         Left(
@@ -140,7 +141,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
     EitherT.fromEither[Future](paymentRecord)
   }
 
-  private def createSingleContributionPaymentRecord(contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase)
+  private def createSingleContributionPaymentRecord(contributionWithSubscriptionPurchase: ContributionWithSubscriptionPurchase, publishTime: Long)
     : Either[UnsupportedNotificationTypeException, PaymentRecord] = {
     (contributionWithSubscriptionPurchase.subscriptionDeveloperNotification.subscriptionNotification.notificationType,
      contributionWithSubscriptionPurchase.subscriptionPurchase.emailAddress) match {
@@ -155,7 +156,7 @@ class MessageRouterImpl @Inject()(googleHTTPClient: GoogleHTTPClient,
             purchaseData.priceCurrencyCode,
             purchaseData.countryCode,
             purchaseData.orderId,
-            System.currentTimeMillis()
+            publishTime
           )
         )
       case a =>
