@@ -18,8 +18,9 @@ Prod: `https://swg.theguardian.com/healthcheck`
 
 The application has a POST endpoint that receives JSON from the Google Cloud PubSub queue.
 
-This can be tested by : `TODO: curl command with some sample json`
+This can be tested by running the spoofer with an instance of ElasticMQ.
 
+`http://localhost:5000/` has a console that you can submit messages to the queue and you can see them ingested in the app.
 
 
 
