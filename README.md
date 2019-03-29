@@ -44,3 +44,10 @@ Coverage report location: `<repo-home>/target/scala-2.12/scoverage-report/index.
 Scapegoat report location: `<repo-home>/target/scala-2.12/scapegoat-report/scapegoat.html`
 
 Scalastyle report location: `<repo-home>/target/scalastyle-result.xml`
+
+
+### Refresh token for talking with Google APIs
+
+A long living refresh token is stored in AWS Param Store under /$app/$stage/google/playDeveloperRefreshToken. This token can be re-generated with [the following steps](https://developers.google.com/android-publisher/authorization).
+
+This token is used by the application to generate shorter living access tokens used to talk with Google APIs. `GoogleAccessTokenClient` caches these access tokens with the expiry time returned by the API.
