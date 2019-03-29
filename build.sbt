@@ -49,7 +49,7 @@ packageSummary := "Contribute with Google"
 packageDescription := """Contribute with Google service - allows for integration with subscribe and contribute with google"""
 
 
-coverageExcludedPackages := "<empty>;Reverse.*;router\\.*"
+coverageExcludedPackages := "<empty>;Reverse.*;router\\.*;queue.*;"
 scapegoatIgnoredFiles := Seq(".*Reverse.*", ".*router.*")
 
 scapegoatDisabledInspections := Seq("FinalModifierOnCaseClass")
