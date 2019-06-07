@@ -17,6 +17,7 @@ scapegoatVersion in ThisBuild := "1.3.2"
 
 val enumeratumPlayJsonVersion = "1.5.16"
 val AWSJavaSDKVersion = "1.11.501"
+val jacksonVersion = "2.9.9"
 
 resolvers += "Guardian Platform Bintray" at "https://dl.bintray.com/guardian/platforms"
 
@@ -32,7 +33,10 @@ libraryDependencies ++= Seq(
   "com.lightbend.akka" %% "akka-stream-alpakka-sqs" % "1.0-M2",
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
   "org.mockito" % "mockito-all" % "1.10.19" % "test",
-  "de.leanovate.play-mockws" %% "play-mockws" % "2.7.0" % Test
+  "de.leanovate.play-mockws" %% "play-mockws" % "2.7.0" % Test,
+  "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
+  "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
+  "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion
 )
 
 topLevelDirectory in Universal := None
