@@ -61,7 +61,7 @@ Resources:
         S3Key: !Sub ${Stack}/${Stage}/${App}/${App}.zip
       Handler: index.handler
       Role: !GetAtt MessageApiAuthLambdaRole.Arn
-      Runtime: nodejs8.10
+      Runtime: nodejs10.x
 
   MessageApiAuthorizeRole:
     Type: AWS::IAM::Role
