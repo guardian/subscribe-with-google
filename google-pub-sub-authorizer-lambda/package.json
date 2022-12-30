@@ -14,6 +14,6 @@
     "deploy-lambda": "VERBOSE=true ARTEFACT_PATH=$PWD riffraff-artefact"
   },
   "devDependencies": {
-    "node-riffraff-artefact": "^2.0.1"
+    "node-riffraff-artefact": "^2.0.2"
   }
 }
